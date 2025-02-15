@@ -1,0 +1,7 @@
+{
+  "name": "Purethink",
+  "country": "KR",
+  "domains": ["switch","sensor","select"],
+  "render_readme": true,
+  "icons": ["images/logo.png"]
+}
