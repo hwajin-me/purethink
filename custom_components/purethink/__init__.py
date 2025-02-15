@@ -70,7 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # MQTT 구독 & 플랫폼 로드
     await mqtt.async_subscribe(hass, status_topic, message_received)
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch", "select"])
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch", "select", "binary_sensor"])
     await async_register_services(hass)
     return True
 
