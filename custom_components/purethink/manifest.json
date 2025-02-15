@@ -1,7 +1,7 @@
 {
     "domain": "purethink",
     "name": "Purethink Ventilation",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "requirements": ["paho-mqtt"],
     "dependencies": ["mqtt"],
     "codeowners": ["@af950833"],
