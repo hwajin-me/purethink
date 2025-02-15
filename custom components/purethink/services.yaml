@@ -1,0 +1,13 @@
+reset_filter:
+  name: "Reset Filter"
+  description: "Resets either the prefilter or the HEPA filter."
+  fields:
+    filter_type:
+      required: true
+      example: "prefilter"
+      selector:
+        select:
+          options:
+            - "prefilter"
+            - "hepafilter"
+          mode: dropdown
