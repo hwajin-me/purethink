@@ -32,3 +32,4 @@
 2. [Text Element Card](https://github.com/custom-cards/text-element) 를 수동으로 설치해 줍니다.
 3. HACS 에서 Mushroom Card를 검색해서 설치해 줍니다.
 4. lovelace.yaml 파일 안의 내용을 복사하셔서 카드를 구성합니다.
+5. 구성 완료된 카드의 필터를 길게 누르고 계시면 해당 필터 사용 시간이 리셋됩니다.
