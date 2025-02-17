@@ -8,7 +8,7 @@
 
 1. Purethink 앱에서 등록할 때 기기를 발견했을 때 화면에 나오는 "DIV01-1234AB" 또는 "THESOOP-1234AB" 형태의 이름을 기억해 둡니다.
 2. 설치하신지 오래 되어 기억이 안나시면 공유기에서 Purethink 제품의 MAC을 확인하시고 마지막 6자리를 메모해 둡니다.
-3. "DIV01-MAC6자리" 또는 "THESOOP-MAC6자리" 형태로 둘 중에 하나입니다.
+3. "DIV01-MAC 6자리" 또는 "THESOOP-MAC 6자리" 형태로 둘 중에 하나입니다.
 
 ## 2. Home Assistant에 Purethink Ventilation 설치
 
