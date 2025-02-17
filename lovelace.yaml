@@ -25,10 +25,6 @@ cards:
         entity: sensor.purethink_tvoc
         icon: mdi:scent
         name: TVOC
-      - type: custom:mushroom-entity-card
-        entity: binary_sensor.purethink_server
-        icon: mdi:wifi
-        name: 서버
   - type: horizontal-stack
     cards:
       - type: custom:mushroom-entity-card
