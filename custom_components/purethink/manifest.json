@@ -3,7 +3,7 @@
     "name": "Purethink Ventilation",
     "version": "1.1.0",
     "requirements": ["paho-mqtt"],
-    "dependencies": ["mqtt"],
+    "dependencies": [],
     "codeowners": ["@af950833"],
 	"documentation": "https://github.com/af950833/purethink",
     "config_flow": true,
