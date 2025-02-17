@@ -29,4 +29,6 @@
 
 ## 3. Lovelace 설정
 현재 리포의 images 폴더 안에 있는 purethink3.jpg 파일을 다운 받으신 후에 HA의 www 폴더 안에 올려 줍니다.
+[Text Element Card](https://github.com/custom-cards/text-element) 를 수동으로 설치해 줍니다.
+HACS 에서 Mushroom Card를 검색해서 설치해 줍니다.
 lovelace.yaml 파일 안의 내용을 복사하셔서 카드를 구성합니다.
