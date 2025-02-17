@@ -1,0 +1,212 @@
+type: vertical-stack
+title: 환기청정기
+cards:
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.purethink_pm1
+        icon: mdi:weather-dust
+        name: PM1
+      - type: custom:mushroom-entity-card
+        entity: sensor.purethink_pm25
+        icon: mdi:weather-dust
+        name: PM2.5
+      - type: custom:mushroom-entity-card
+        entity: sensor.purethink_pm10
+        icon: mdi:weather-dust
+        name: PM10
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.purethink_co2
+        icon: mdi:molecule-co2
+        name: CO2
+      - type: custom:mushroom-entity-card
+        entity: sensor.purethink_tvoc
+        icon: mdi:scent
+        name: TVOC
+      - type: custom:mushroom-entity-card
+        entity: binary_sensor.purethink_server
+        icon: mdi:wifi
+        name: 서버
+  - type: horizontal-stack
+    cards:
+      - type: custom:mushroom-entity-card
+        entity: sensor.purethink_prefilter
+        icon: mdi:air-filter
+        name: 프리필터
+        hold_action:
+          action: call-service
+          service: purethink.reset_filter
+          data:
+            filter_type: prefilter
+      - type: custom:mushroom-entity-card
+        entity: sensor.purethink_hepafilter
+        icon: mdi:air-filter
+        name: 헤파필터
+        hold_action:
+          action: call-service
+          service: purethink.reset_filter
+          data:
+            filter_type: hepafilter
+  - type: picture-elements
+    image: local/purethink3.jpg
+    elements:
+      - type: custom:text-element
+        text: Purethink
+        style:
+          top: 5%
+          left: 42%
+          font-size: 100%
+      - type: state-icon
+        entity: switch.purethink_power
+        title: Power
+        icon: mdi:power-standby
+        tap_action:
+          action: call-service
+          service: switch.toggle
+          service_data:
+            entity_id: switch.purethink_power
+        style:
+          top: 30%
+          left: 40%
+          transform: translate(-50%, 0)
+          "--paper-item-icon-color": rgb(128, 128, 128)
+          "--paper-item-icon-active-color": rgb(255, 128, 0)
+      - type: state-icon
+        entity: switch.purethink_power
+        title: More Info
+        icon: mdi:dots-vertical
+        tap_action:
+          action: more-info
+        style:
+          top: 30%
+          left: 78%
+          transform: translate(-50%, 0)
+          "--paper-item-icon-color": rgb(128, 128, 128)
+          "--paper-item-icon-active-color": rgb(128, 128, 128)
+      - type: state-icon
+        entity: binary_sensor.purethink_ai
+        title: AI Mode
+        icon: mdi:alpha-a-circle
+        tap_action:
+          action: call-service
+          service: select.select_option
+          service_data:
+            entity_id: select.purethink_device_mode
+            option: AI Mode
+        style:
+          top: 45%
+          left: 45%
+          transform: translate(-50%, 0)
+          "--paper-item-icon-color": rgb(128, 128, 128)
+          "--paper-item-icon-active-color": rgb(255, 128, 0)
+      - type: state-icon
+        entity: binary_sensor.purethink_normal
+        title: Fan Mode
+        icon: mdi:fan
+        tap_action:
+          action: call-service
+          service: select.select_option
+          service_data:
+            entity_id: select.purethink_device_mode
+            option: Normal
+        style:
+          top: 45%
+          left: 60%
+          transform: translate(-50%, 0)
+          "--paper-item-icon-color": rgb(128, 128, 128)
+          "--paper-item-icon-active-color": rgb(255, 128, 0)
+      - type: state-icon
+        entity: binary_sensor.purethink_sleep
+        title: Sleep Mode
+        icon: mdi:power-sleep
+        tap_action:
+          action: call-service
+          service: select.select_option
+          service_data:
+            entity_id: select.purethink_device_mode
+            option: Sleep 3
+        style:
+          top: 45%
+          left: 75%
+          transform: translate(-50%, 0)
+          "--paper-item-icon-color": rgb(128, 128, 128)
+          "--paper-item-icon-active-color": rgb(255, 128, 0)
+      - type: state-label
+        entity: select.purethink_fan_mode
+        tap_action:
+          action: more-info
+        style:
+          top: 70%
+          left: 72%
+          min-width: 40px
+          min-height: 40px
+          text-align: center
+          font-size: 90%
+          transform: translate(-100%, 0)
+          color: rgb(0,0,0)
+      - type: state-label
+        entity: select.purethink_pressure_mode
+        tap_action:
+          action: more-info
+        style:
+          top: 75%
+          left: 65%
+          min-width: 40px
+          min-height: 40px
+          text-align: center
+          font-size: 90%
+          transform: translate(-100%, 0)
+          color: rgb(0,0,0)
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.purethink_normal
+            state: "on"
+        elements:
+          - type: state-label
+            entity: select.purethink_fan_speed
+            title: Fan Speed
+            tap_action:
+              action: none
+            style:
+              top: 58%
+              left: 60%
+              min-width: 40px
+              min-height: 40px
+              text-align: center
+              font-size: 150%
+              transform: translate(-50%, 0)
+              color: rgb(128, 128, 128)
+          - type: icon
+            icon: mdi:plus
+            title: Fan level up
+            tap_action:
+              action: call-service
+              service: select.select_next
+              service_data:
+                entity_id: select.purethink_fan_speed
+            style:
+              top: 59%
+              left: 55%
+              min-width: 40px
+              min-height: 40px
+              transform: translate(-50%, 0)
+              color: rgb(192, 192, 192)
+              color_off: rgb(255, 128, 0)
+          - type: icon
+            icon: mdi:minus
+            title: Fan level down
+            tap_action:
+              action: call-service
+              service: select.select_previous
+              service_data:
+                entity_id: select.purethink_fan_speed
+            style:
+              top: 59%
+              left: 68%
+              min-width: 40px
+              min-height: 40px
+              transform: translate(-50%, 0)
+              color: rgb(192, 192, 192)
+              color_off: rgb(255, 128, 0)
