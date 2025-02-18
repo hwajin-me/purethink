@@ -15,7 +15,7 @@ ENTITY_ICONS = {
     "filter": "mdi:air-filter",
     "co2": "mdi:molecule-co2",
     "pm": "mdi:air-purifier",
-    "tvoc": "mdi:scent",
+    "odor": "mdi:scent",
     "alarm": "mdi:alert-circle-outline"
 }
 
