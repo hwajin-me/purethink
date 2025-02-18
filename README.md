@@ -37,4 +37,4 @@
 ## Version History
 - 25/02/16 V1.0.0 초기 릴리즈
 - 25/02/17 V1.5.1 HA 내장 MQTT 제거 후 제조사 서버에 직접 통신 형태로 변경
-- 25/02/17 V1.5.5 Bit parsing 정리, Wifi 감도 센서 추가
+- 25/02/18 V1.5.5 Bit parsing 정리, Wifi 감도 센서 추가
