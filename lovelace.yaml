@@ -22,9 +22,9 @@ cards:
         icon: mdi:molecule-co2
         name: CO2
       - type: custom:mushroom-entity-card
-        entity: sensor.purethink_tvoc
+        entity: sensor.purethink_odor
         icon: mdi:scent
-        name: TVOC
+        name: Odor
       - type: custom:mushroom-entity-card
         entity: sensor.purethink_wifi
         icon: mdi:wifi
