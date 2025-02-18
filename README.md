@@ -24,7 +24,7 @@
    - **friendly_name**: 원하는 센서 이름을 입력합니다(Purethink 로 넣으시면 아래쪽의 Lovelace 적용시 센서 이름 변경이 필요 없음)
    - **device_id**: 사용 준비에서 구한 "DIV01-MAC6자리" 또는 "THESOOP-MAC6자리"
 
-추가가 완료되면 총 17개의 entity_id가 추가 됩니다.
+추가가 완료되면 총 18개의 entity_id가 추가 됩니다.
 센서류는 20~30초 정도 후에 값이 올라오면서 정상으로 보이실 겁니다.
 
 ## 3. Lovelace 설정
