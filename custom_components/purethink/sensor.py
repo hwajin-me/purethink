@@ -12,7 +12,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         AirQualitySensor(config_entry, "pm1", "µg/m³"),
         AirQualitySensor(config_entry, "pm25", "µg/m³"),
         AirQualitySensor(config_entry, "pm10", "µg/m³"),
-        AirQualitySensor(config_entry, "tvoc", "ppb"),
+        AirQualitySensor(config_entry, "odor", "level"),
         WifiSensor(config_entry),
         FilterSensor(config_entry, "prefilter"),
         FilterSensor(config_entry, "hepafilter"),
@@ -51,7 +51,7 @@ class BaseSensor(SensorEntity):
 class AirQualitySensor(BaseSensor):
 
     def __init__(self, entry, sensor_type, unit):
-        icon = "mdi:air-filter" if "pm" in sensor_type else "mdi:scent" if "tvoc" in sensor_type else "mdi:molecule-co2"
+        icon = "mdi:air-filter" if "pm" in sensor_type else "mdi:scent" if "odor" in sensor_type else "mdi:molecule-co2"
         super().__init__(entry, sensor_type, unit, icon)
 
 class WifiSensor(BaseSensor):
