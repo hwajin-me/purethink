@@ -11,30 +11,30 @@ def parse_status_packet(payload: str) -> dict:
     _LOGGER.debug(f"Parsing raw packet: {payload[:24]}...")
     try:
         return {
-            # 5번째 바이트 (0x21)
-            'power': (int(payload[8:10], 16) & 0b10000000) >> 7,
-            'fan_speed': (int(payload[8:10], 16) & 0b01110000) >> 4,
-            'ai_mode': (int(payload[8:10], 16) & 0b00001000) >> 3,
-            'sleep_mode': (int(payload[8:10], 16) & 0b00000110) >> 1,
-            'input_occurred': (int(payload[8:10], 16) & 0b00000001),
-            
-            # 6번째 바이트
-            'tvoc': (int(payload[10:12], 16) & 0b11000000) >> 6,
-            'pressure_mode': (int(payload[10:12], 16) & 0b00110000) >> 4,
-            'wifi_status': (int(payload[10:12], 16) & 0b00000111),
-            
-            # 7번째 바이트
-            'fan_in': (int(payload[12:14], 16) & 0b10000000) >> 7,
-            'fan_out': (int(payload[12:14], 16) & 0b01000000) >> 6,
-            'reserved_bits': (int(payload[12:14], 16) & 0b00111111),
-            
-            # 8번째 바이트 (알람 상태)
-            'fan1_alarm': (int(payload[14:16], 16) & 0b10000000) >> 7,
-            'fan2_alarm': (int(payload[14:16], 16) & 0b01000000) >> 6,
-            'dust_sensor_alarm': (int(payload[14:16], 16) & 0b00100000) >> 5,
-            'co2_sensor_alarm': (int(payload[14:16], 16) & 0b00010000) >> 4,
-            'filter_alarm': (int(payload[14:16], 16) & 0b00001000) >> 3,
-            'heat_exchanger_alarm': (int(payload[14:16], 16) & 0b00000100) >> 2,
+            # 5번째 바이트 (0x21) - 전원, 팬 속도, AI 모드, 수면 모드, 입력 감지
+            'power': _parse_bits(payload[8:10], 0, 1),
+            'fan_speed': _parse_bits(payload[8:10], 1, 3),
+            'ai_mode': _parse_bits(payload[8:10], 4, 1),
+            'sleep_mode': _parse_bits(payload[8:10], 5, 2),
+            'input_occurred': _parse_bits(payload[8:10], 7, 1),
+
+            # 6번째 바이트 (0x22) - TVOC, 압력 모드, WiFi 상태
+            'tvoc': _parse_bits(payload[10:12], 0, 2),
+            'pressure_mode': _parse_bits(payload[10:12], 2, 2),
+            'wifi': _parse_bits(payload[10:12], 5, 3),
+
+            # 7번째 바이트 (0x23) - 팬 흡기, 팬 배기, 예약된 비트
+            'fan_in': _parse_bits(payload[12:14], 0, 1),
+            'fan_out': _parse_bits(payload[12:14], 1, 1),
+            'reserved_bits': _parse_bits(payload[12:14], 2, 6),
+
+            # 8번째 바이트 (0x24) - 알람 상태
+            'fan1_alarm': _parse_bits(payload[14:16], 0, 1),
+            'fan2_alarm': _parse_bits(payload[14:16], 1, 1),
+            'dust_sensor_alarm': _parse_bits(payload[14:16], 2, 1),
+            'co2_sensor_alarm': _parse_bits(payload[14:16], 3, 1),
+            'filter_alarm': _parse_bits(payload[14:16], 4, 1),
+            'heat_exchanger_alarm': _parse_bits(payload[14:16], 5, 1),
             
             # 9-14바이트: 측정값
             'co2': _parse_bits(payload[16:28], 1, 13),
