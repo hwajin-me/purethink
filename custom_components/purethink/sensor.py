@@ -13,7 +13,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         AirQualitySensor(config_entry, "pm25", "µg/m³"),
         AirQualitySensor(config_entry, "pm10", "µg/m³"),
         AirQualitySensor(config_entry, "odor", "level"),
-        WifiSensor(config_entry),
+        WifiSensor(config_entry, "wifi", "%", "mdi:wifi"),
         FilterSensor(config_entry, "prefilter"),
         FilterSensor(config_entry, "hepafilter"),
         AlarmSensor(config_entry, "filter"),
@@ -55,9 +55,15 @@ class AirQualitySensor(BaseSensor):
         super().__init__(entry, sensor_type, unit, icon)
 
 class WifiSensor(BaseSensor):
+    def __init__(self, entry, sensor_type, unit, icon):
+        super().__init__(entry, sensor_type, unit, icon)  # icon을 추가
 
-    def __init__(self, entry):
-        super().__init__(entry, "wifi", None, "mdi:wifi")
+    def _update_state(self):
+        state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
+        raw_value = state.get(self._sensor_type, 0)
+        self._attr_native_value = int((raw_value / 7) * 100)
+        self._attr_available = True
+        self.schedule_update_ha_state()
         
 class FilterSensor(BaseSensor):
 
