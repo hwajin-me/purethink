@@ -18,8 +18,8 @@ def parse_status_packet(payload: str) -> dict:
             'sleep_mode': _parse_bits(payload[8:10], 5, 2),
             'input_occurred': _parse_bits(payload[8:10], 7, 1),
 
-            # 6번째 바이트 (0x22) - TVOC, 압력 모드, WiFi 상태
-            'tvoc': _parse_bits(payload[10:12], 0, 2),
+            # 6번째 바이트 (0x22) - 악취(odor), 압력 모드, WiFi 상태
+            'odor': _parse_bits(payload[10:12], 0, 2),
             'pressure_mode': _parse_bits(payload[10:12], 2, 2),
             'wifi': _parse_bits(payload[10:12], 5, 3),
 
