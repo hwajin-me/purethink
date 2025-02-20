@@ -1,23 +1,23 @@
 import logging
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from .const import DOMAIN, ENTITY_ICONS
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     entry_data = hass.data[DOMAIN][config_entry.entry_id]
     sensors = [
-        AirQualitySensor(config_entry, "co2", "ppm"),
-        AirQualitySensor(config_entry, "pm1", "µg/m³"),
-        AirQualitySensor(config_entry, "pm25", "µg/m³"),
-        AirQualitySensor(config_entry, "pm10", "µg/m³"),
-        AirQualitySensor(config_entry, "odor", "level"),
+        AirQualitySensor(config_entry, "co2", "ppm", "mdi:molecule-co2"),
+        AirQualitySensor(config_entry, "pm1", "µg/m³", "mdi:weather-dust"),
+        AirQualitySensor(config_entry, "pm25", "µg/m³", "mdi:weather-dust"),
+        AirQualitySensor(config_entry, "pm10", "µg/m³", "mdi:weather-dust"),
+        AirQualitySensor(config_entry, "odor", "level", "mdi:scent"),
         WifiSensor(config_entry, "wifi", "%", "mdi:wifi"),
-        FilterSensor(config_entry, "prefilter"),
-        FilterSensor(config_entry, "hepafilter"),
-        AlarmSensor(config_entry, "filter"),
-        AlarmSensor(config_entry, "fan")
+        FilterSensor(config_entry, "prefilter", "시간", "mdi:air-filter"),
+        FilterSensor(config_entry, "hepafilter", "시간", "mdi:air-purifier"),
+        AlarmSensor(config_entry, "filter", None, "mdi:alert-circle-outline"),
+        AlarmSensor(config_entry, "fan", None, "mdi:fan-alert")
     ]
     async_add_entities(sensors)
 
@@ -28,7 +28,7 @@ class BaseSensor(SensorEntity):
         self._sensor_type = sensor_type
         config = entry.data
         self._attr_unique_id = f"{config['device_id']}_{sensor_type}"
-        self._attr_name = f"{config['friendly_name']} {sensor_type.title()}"
+        self._attr_name = f"{config['friendly_name']} {sensor_type.replace('_', ' ').title()}"
         self._attr_native_unit_of_measurement = unit
         self._attr_icon = icon
         self._attr_available = False
@@ -43,54 +43,55 @@ class BaseSensor(SensorEntity):
         )
 
     def _update_state(self):
-        state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
-        self._attr_native_value = state.get(self._sensor_type)
-        self._attr_available = True
+        state = self.hass.data[DOMAIN][self._entry.entry_id].get("state", {})
+        self._attr_native_value = state.get(self._sensor_type, None)
+        self._attr_available = self._attr_native_value is not None
         self.schedule_update_ha_state()
 
 class AirQualitySensor(BaseSensor):
 
-    def __init__(self, entry, sensor_type, unit):
-        icon = "mdi:air-filter" if "pm" in sensor_type else "mdi:scent" if "odor" in sensor_type else "mdi:molecule-co2"
+    def __init__(self, entry, sensor_type, unit, icon):
         super().__init__(entry, sensor_type, unit, icon)
 
 class WifiSensor(BaseSensor):
     def __init__(self, entry, sensor_type, unit, icon):
-        super().__init__(entry, sensor_type, unit, icon)  # icon을 추가
+        super().__init__(entry, sensor_type, unit, icon)
 
     def _update_state(self):
-        state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
+        state = self.hass.data[DOMAIN][self._entry.entry_id].get("state", {})
         raw_value = state.get(self._sensor_type, 0)
-        self._attr_native_value = int((raw_value / 7) * 100)
+        self._attr_native_value = int((raw_value / 7) * 100) if raw_value else 0
         self._attr_available = True
         self.schedule_update_ha_state()
         
 class FilterSensor(BaseSensor):
 
-    def __init__(self, entry, filter_type):
-        super().__init__(entry, f"{filter_type}", "시간", ENTITY_ICONS["filter"])
+    def __init__(self, entry, filter_type, unit, icon):
+        super().__init__(entry, f"{filter_type}", unit, icon)
         self.filter_type = filter_type
-
+        
     def _update_state(self):
-        state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
-        self._attr_native_value = state.get(f"{self.filter_type}_hours")
-        self._attr_available = True
+        state = self.hass.data[DOMAIN][self._entry.entry_id].get("state", {})
+        self._attr_native_value = state.get(f"{self.filter_type}_hours", None)
+        self._attr_available = self._attr_native_value is not None
         self.schedule_update_ha_state()
 
     @property
     def extra_state_attributes(self):
+        state = self.hass.data[DOMAIN][self._entry.entry_id].get("state", {})
         return {
-            "reset_needed": self.hass.data[DOMAIN][self._entry.entry_id]["state"].get(f"{self.filter_type}_reset")
+            "reset_needed": state.get(f"{self.filter_type}_reset", False)
         }
 
 class AlarmSensor(BaseSensor):
 
-    def __init__(self, entry, alarm_type):
-        super().__init__(entry, f"{alarm_type}_alarm", None, ENTITY_ICONS["alarm"])
+    def __init__(self, entry, alarm_type, unit=None, icon=None):
+        super().__init__(entry, f"{alarm_type}_alarm", unit, icon)
         self._alarm_type = alarm_type
 
     def _update_state(self):
-        state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
+        state = self.hass.data[DOMAIN][self._entry.entry_id].get("state", {})
         self._attr_native_value = "on" if state.get(f"{self._alarm_type}_alarm") else "off"
         self._attr_available = True
         self.schedule_update_ha_state()
+        
