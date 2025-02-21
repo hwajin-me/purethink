@@ -104,14 +104,17 @@ class DeviceModeSelect(SelectEntity):
 
     async def async_select_option(self, option: str):
         try:
-            state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
-            
-            if self._attr_current_option == "Normal" and option != "Normal":
-                self.hass.data[DOMAIN][self._entry.entry_id]["last_fan_speed"] = state.get("fan_speed", 4)
-                _LOGGER.debug(f"[DeviceModeSelect] Fan Speed 저장: {state.get('fan_speed', 4)}")
+            entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
+            state = entry_data.get("state", {})
+
+            if state.get("power") == 1 and self._attr_current_option == "Normal" and option != "Normal":
+                entry_data["last_fan_speed"] = state.get("fan_speed", 4)
+                _LOGGER.debug(f"[DeviceModeSelect] Fan Speed 저장: {entry_data['last_fan_speed']}")
 
             if option == "Normal":
-                last_fan_speed = self.hass.data[DOMAIN][self._entry.entry_id].get("last_fan_speed", 4)
+                last_fan_speed = entry_data.get("last_fan_speed", 4)
+                _LOGGER.debug(f"[DeviceModeSelect] Normal 모드 복귀 - 저장된 Fan Speed: {last_fan_speed}")
+
                 mqtt_client.publish(
                     self._command_topic,
                     generate_command(
