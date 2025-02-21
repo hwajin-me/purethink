@@ -52,28 +52,44 @@ class PowerSwitch(SwitchEntity):
         return bool(state.get("power", 0))
 
     async def async_turn_off(self, **kwargs):
-        """전원 끄기 전에 현재 팬 속도를 저장"""
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
         state = entry_data.get("state", {})
-    
-        # 현재 팬 속도를 저장 (없으면 기본값 4)
-        entry_data["last_fan_speed"] = state.get("fan_speed", 4)
-        _LOGGER.debug(f"[PowerSwitch] 전원 끄기 - 현재 Fan Speed 저장: {entry_data['last_fan_speed']}")
+        
+        # 현재 디바이스 모드 저장
+        if state.get("ai_mode") == 1:
+            entry_data["last_device_mode"] = "AI Mode"
+        elif state.get("sleep_mode") == 1:
+            entry_data["last_device_mode"] = "Sleep 1"
+        elif state.get("sleep_mode") == 2:
+            entry_data["last_device_mode"] = "Sleep 2"
+        elif state.get("sleep_mode") == 3:
+            entry_data["last_device_mode"] = "Sleep 3"
+        else:
+            entry_data["last_device_mode"] = state.get("device_mode", "Normal")
+        _LOGGER.debug(f"[PowerSwitch] 전원 끄기 -현재 Device Mode 저장: {entry_data['last_device_mode']}")
+        
+        if entry_data["last_device_mode"] == "Normal":
+            # Normal모드일 때만 현재 팬 속도를 저장
+            entry_data["last_fan_speed"] = state.get("fan_speed", 4)
+            _LOGGER.debug(f"[PowerSwitch] 전원 끄기 - 현재 Fan Speed 저장: {entry_data['last_fan_speed']}")
     
         # 전원 끄기 명령 전송
         await self._send_command(mode="off")
-    
     
     async def async_turn_on(self, **kwargs):
         """전원 켜기 (저장된 팬 속도로 복원)"""
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
     
-        # 저장된 팬 속도 가져오기 (없으면 기본값 4)
-        last_fan_speed = entry_data.get("last_fan_speed", 4)
-    
-        await self._send_command(mode="on", fan_speed=last_fan_speed)
-        _LOGGER.debug(f"[PowerSwitch] 전원 켜짐 - 저장된 Fan Speed 복원: {last_fan_speed}")
-
+        # 저장된 디바이스 모드, 팬 속도 가져오기 (없으면 기본값 Normal, 4)
+        
+        last_device_mode = entry_data.get("last_device_mode", "Normal")
+        if last_device_mode == "Normal":
+            last_fan_speed = entry_data.get("last_fan_speed", 4)
+            await self._send_command(mode="on", fan_speed=last_fan_speed,device_mode=last_device_mode)
+            _LOGGER.debug(f"[PowerSwitch] 전원 켜짐 - 저장된 Fan Speed 복원: {last_fan_speed}, 저장된 Device Mode 복원: {last_device_mode}")
+        else:
+            await self._send_command(mode="on", device_mode=last_device_mode)
+            _LOGGER.debug(f"[PowerSwitch] 전원 켜짐 - 저장된 Device Mode 복원: {last_device_mode}")
 
     async def _send_command(self, **kwargs):
         """MQTT 명령 전송"""
