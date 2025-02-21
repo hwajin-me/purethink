@@ -41,12 +41,18 @@ class PureThinkModeSensor(BinarySensorEntity):
     def _handle_update(self):
         """현재 모드 확인 후 센서 상태 업데이트"""
         state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
-        device_mode = (
-            "AI Mode" if state.get("ai_mode") == 1 else
-            f"Sleep {state.get('sleep_mode')}" if state.get("sleep_mode") in [1, 2, 3] else
-            "Normal"
-        )
 
-        self._attr_is_on = device_mode == self._mode_name or (self._mode_name == "Sleep" and "Sleep" in device_mode)
+        if state.get("power", 1) == 0:
+            self._attr_is_on = False
+            _LOGGER.debug(f"[BinarySensor] Power가 꺼져 있음 - {self._mode_name} 센서 Off")
+        else:
+            device_mode = (
+                "AI Mode" if state.get("ai_mode") == 1 else
+                f"Sleep {state.get('sleep_mode')}" if state.get("sleep_mode") in [1, 2, 3] else
+                "Normal"
+            )
+
+            self._attr_is_on = device_mode == self._mode_name or (self._mode_name == "Sleep" and "Sleep" in device_mode)
+
         self._attr_available = True
         self.schedule_update_ha_state()
