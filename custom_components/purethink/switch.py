@@ -53,7 +53,6 @@ class PowerSwitch(SwitchEntity):
 
     @property
     def icon(self):
-        """전원의 현재 상태에 따라 아이콘 반환"""
         return "mdi:power"
 
     async def async_turn_off(self, **kwargs):
