@@ -60,14 +60,12 @@ def _parse_bits(hex_str: str, start_bit: int, length: int) -> int:
         raise
 
 def _parse_filter(hex_str: str, start_bit: int, length: int) -> dict:
-    """필터 데이터 파싱"""
     return {
         'reset_flag': bool(_parse_bits(hex_str, start_bit-2, 1)),
         'hours': _parse_bits(hex_str, start_bit, length)
     }
 
 def generate_command(device_id: str, hass, **kwargs) -> str:
-    """현재 상태를 정확히 반영하여 명령어 생성"""
     try:
         state = {}
         for entry_id, data in hass.data.get(DOMAIN, {}).items():
@@ -80,10 +78,8 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
             kwargs["power"] = 1 if kwargs["mode"] == "on" else 0
 
         if "device_mode" in kwargs and kwargs["device_mode"] == "Normal":
-            # ✅ AI Mode 및 Sleep Mode 해제 (Normal 모드는 이 기능들이 꺼지는 상태)
             kwargs["ai_mode"] = 0
-            kwargs["sleep_mode"] = 0  # Sleep Mode도 0으로 설정
-
+            kwargs["sleep_mode"] = 0
             _LOGGER.debug(f"[generate_command] Normal 모드 복귀 - AI Mode: 0, Sleep Mode: 0")
 
 
@@ -103,8 +99,9 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
             }.get(kwargs["fan_mode"], (0, 0))
             
         combined = {**state, **kwargs}
-
         device_mode = combined.get("device_mode") or combined.get("mode")
+        topic_id = str(random.randint(100000, 200000))
+        
         if device_mode in ["Sleep 1", "Sleep 2", "Sleep 3","AI Mode"]:
             payloads = {
                 "Sleep 1": "A8A817228300C0000000000000000000000000000002CC",
@@ -115,12 +112,10 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
             contents = payloads[device_mode]
             _LOGGER.debug(f"[generate_command] 고정된 Device Mode({device_mode}) CMD: {contents}")
             return json.dumps({
-                "topic_id": str(random.randint(100000, 200000)),
+                "topic_id": topic_id,
                 "type": "CMD",
                 "contents": contents
             })
-
-        topic_id = str(random.randint(100000, 200000))
 
         # B5 (전원, 팬속도, AI 모드 구성)
         bin_power = int(combined.get("power", 0)) << 7
@@ -128,8 +123,6 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
         bin_ai_mode = int(combined.get("ai_mode", 0)) << 3
         bin_sleep_mode = int(combined.get("sleep_mode", 0)) << 1
         b5 = bin_power | bin_fan_speed | bin_ai_mode | bin_sleep_mode | 1
-
-        _LOGGER.debug(f"bin_power: {bin_power}, bin_fan_speed: {bin_fan_speed}, bin_ai_mode: {bin_ai_mode}, b5: {b5}")
 
         # B6 (압력 모드)
         b6 = int(combined.get("pressure_mode", 0)) << 4
@@ -152,10 +145,10 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
             
             if reset_type == "prefilter":
                 b15 = 135
-                b16 = 208  # Pre-filter 리셋 명령어(2000시간)
+                b16 = 208
             elif reset_type == "hepafilter":
                 b17 = 143
-                b18 = 160  # HEPA 필터 리셋 명령어(4000시간)
+                b18 = 160
             else:
                 _LOGGER.error(f"Invalid filter reset type: {reset_type}")
                 return None
