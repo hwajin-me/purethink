@@ -28,6 +28,15 @@ class PureThinkModeSensor(BinarySensorEntity):
         self._attr_is_on = False
         self._attr_available = False
 
+    @property
+    def icon(self):
+        if self._mode_name == "AI Mode":
+            return "mdi:alpha-a-circle"
+        elif self._mode_name == "Sleep":
+            return "mdi:power-sleep"
+        else:  # Normal 모드
+            return "mdi:fan"
+
     async def async_added_to_hass(self):
         """상태 업데이트 신호 구독"""
         self.async_on_remove(
