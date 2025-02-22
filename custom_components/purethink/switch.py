@@ -51,6 +51,11 @@ class PowerSwitch(SwitchEntity):
         state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
         return bool(state.get("power", 0))
 
+    @property
+    def icon(self):
+        """전원의 현재 상태에 따라 아이콘 반환"""
+        return "mdi:power"
+
     async def async_turn_off(self, **kwargs):
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
         state = entry_data.get("state", {})
