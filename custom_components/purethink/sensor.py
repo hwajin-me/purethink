@@ -15,7 +15,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         AirQualitySensor(config_entry, "odor", "level", "mdi:scent"),
         WifiSensor(config_entry, "wifi", "%", "mdi:wifi"),
         FilterSensor(config_entry, "prefilter", "시간", "mdi:air-filter"),
-        FilterSensor(config_entry, "hepafilter", "시간", "mdi:air-purifier"),
+        FilterSensor(config_entry, "hepafilter", "시간", "mdi:air-filter"),
         AlarmSensor(config_entry, "filter", None, "mdi:alert-circle-outline"),
         AlarmSensor(config_entry, "fan", None, "mdi:fan-alert")
     ]
