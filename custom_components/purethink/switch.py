@@ -57,7 +57,7 @@ class PowerSwitch(SwitchEntity):
 
     async def async_turn_off(self, **kwargs):
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
-        state = entry_data.get("state", {})
+        state = entry_data.get("state", {}).copy()
         
         # 현재 디바이스 모드 저장
         if state.get("ai_mode") == 1:
