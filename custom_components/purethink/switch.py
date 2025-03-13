@@ -57,7 +57,7 @@ class PowerSwitch(SwitchEntity):
 
     async def async_turn_off(self, **kwargs):
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
-        state = entry_data.get("state", {}).copy()
+        state = entry_data.get("state", {})
         
         # 현재 디바이스 모드 저장
         if state.get("ai_mode") == 1:
@@ -73,9 +73,11 @@ class PowerSwitch(SwitchEntity):
         _LOGGER.debug(f"[PowerSwitch] 전원 끄기 -현재 Device Mode 저장: {entry_data['last_device_mode']}")
         
         if entry_data["last_device_mode"] == "Normal":
-            # Normal모드일 때만 현재 팬 속도를 저장
-            entry_data["last_fan_speed"] = state.get("fan_speed", 4)
-            _LOGGER.debug(f"[PowerSwitch] 전원 끄기 - 현재 Fan Speed 저장: {entry_data['last_fan_speed']}")
+            current_fan_speed = state.get("fan_speed", 4)
+            # Normal모드이면서 현재 팬 속도가 0이 아니면 팬속도 저장
+            if current_fan_speed != 0:
+                entry_data["last_fan_speed"] = current_fan_speed
+            _LOGGER.debug(f"[PowerSwitch] 전원 끄기 - 현재 Fan Speed 저장: {entry_data.get('last_fan_speed')}")
     
         # 전원 끄기 명령 전송
         await self._send_command(mode="off")
