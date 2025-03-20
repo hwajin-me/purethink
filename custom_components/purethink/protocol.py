@@ -73,16 +73,36 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
                 if device_id in entry_id or device_id in data.get("command_topic", ""):
                     state = data.get("state", {})
                     break
-                    
-        if "mode" in kwargs and "power" not in kwargs:
-            kwargs["power"] = 1 if kwargs["mode"] == "on" else 0
 
-        if "device_mode" in kwargs and kwargs["device_mode"] == "Normal":
-            kwargs["ai_mode"] = 0
-            kwargs["sleep_mode"] = 0
-            _LOGGER.debug(f"[generate_command] Normal 모드 복귀 - AI Mode: 0, Sleep Mode: 0")
+        # "mode" 파라미터가 전원 제어("on", "off")인지 기기 모드 변경인지 구분
+        if "mode" in kwargs:
+            if kwargs["mode"] in ["on", "off"]:
+                kwargs["power"] = 1 if kwargs["mode"] == "on" else 0
+            else:
+                # 기기 모드 변경인 경우 "mode"를 "device_mode"로 처리하고, 전원은 켜진 상태(1)를 기본값으로 설정
+                kwargs["device_mode"] = kwargs["mode"]
+                kwargs.pop("mode")
+                if "power" not in kwargs:
+                    kwargs["power"] = 1
 
+        # device_mode에 따른 ai_mode, sleep_mode 설정
+        if "device_mode" in kwargs:
+            mode = kwargs["device_mode"]
+            if mode == "Normal":
+                kwargs["ai_mode"] = 0
+                kwargs["sleep_mode"] = 0
+            elif mode == "AI Mode":
+                kwargs["ai_mode"] = 1
+                kwargs["sleep_mode"] = 0
+            elif "Sleep" in mode:
+                try:
+                    sleep_value = int(mode.split()[1])
+                except Exception:
+                    sleep_value = 1  # 기본값
+                kwargs["ai_mode"] = 0
+                kwargs["sleep_mode"] = sleep_value
 
+        # pressure_mode 문자열을 숫자로 변환 (정압:0, 양압:1, 음압:2)
         if "pressure_mode" in kwargs:
             kwargs["pressure_mode"] = {
                 "정압": 0,
@@ -90,6 +110,7 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
                 "음압": 2
             }.get(kwargs["pressure_mode"], 0)
 
+        # fan_mode 문자열을 흡기/배기 비트로 변환
         if "fan_mode" in kwargs:
             kwargs["fan_in"], kwargs["fan_out"] = {
                 "흡기Off-배기Off": (0, 0),
@@ -97,52 +118,39 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
                 "흡기On-배기Off":  (1, 0),
                 "흡기On-배기On":   (1, 1)
             }.get(kwargs["fan_mode"], (0, 0))
-            
+
+        # 기존 상태와 새로운 인자 합치기
         combined = {**state, **kwargs}
-        device_mode = combined.get("device_mode") or combined.get("mode")
+        fan_speed = combined.get("fan_speed", 4)
+        power = combined.get("power", 0)
+        ai_mode = combined.get("ai_mode", 0)
+        sleep_mode = combined.get("sleep_mode", 0)
+        pressure_mode = combined.get("pressure_mode", 0)
+        fan_in = combined.get("fan_in", 0)
+        fan_out = combined.get("fan_out", 0)
+
         topic_id = str(random.randint(100000, 200000))
         
-        if device_mode in ["Sleep 1", "Sleep 2", "Sleep 3","AI Mode"]:
-            payloads = {
-                "Sleep 1": "A8A817228300C0000000000000000000000000000002CC",
-                "Sleep 2": "A8A817228500C0000000000000000000000000000002CE",
-                "Sleep 3": "A8A817228700C0000000000000000000000000000002D0",
-                "AI Mode": "A8A817228900C0000000000000000000000000000002D2"
-            }
-            contents = payloads[device_mode]
-            _LOGGER.debug(f"[generate_command] 고정된 Device Mode({device_mode}) CMD: {contents}")
-            return json.dumps({
-                "topic_id": topic_id,
-                "type": "CMD",
-                "contents": contents
-            })
-
-        # B5 (전원, 팬속도, AI 모드 구성)
-        bin_power = int(combined.get("power", 0)) << 7
-        bin_fan_speed = int(combined.get("fan_speed", 0)) << 4
-        bin_ai_mode = int(combined.get("ai_mode", 0)) << 3
-        bin_sleep_mode = int(combined.get("sleep_mode", 0)) << 1
+        # B5: 전원, 팬 속도, AI 모드, 수면 모드 (각각 비트 연산 적용)
+        bin_power = int(power) << 7
+        bin_fan_speed = int(fan_speed) << 4
+        bin_ai_mode = int(ai_mode) << 3
+        bin_sleep_mode = int(sleep_mode) << 1
         b5 = bin_power | bin_fan_speed | bin_ai_mode | bin_sleep_mode | 1
 
-        # B6 (압력 모드)
-        b6 = int(combined.get("pressure_mode", 0)) << 4
+        # B6: 압력 모드 (숫자로 변환된 값을 사용)
+        b6 = int(pressure_mode) << 4
 
-        # B7 (팬 모드)
-        bin_fan_in = int(combined.get("fan_in", 0)) << 7
-        bin_fan_out = int(combined.get("fan_out", 0)) << 6
+        # B7: 팬 모드 (흡기, 배기)
+        bin_fan_in = int(fan_in) << 7
+        bin_fan_out = int(fan_out) << 6
         b7 = bin_fan_in | bin_fan_out
-        
+
         # B15, B16(프리필터 : 2000시간 - 135 208, 3000시간 - 139 184, 40000시간 - 143 160)
-        b15 = 0
-        b16 = 0
-        
         # B17, B18(헤파필터 : 2000시간 - 135 208, 3000시간 - 139 184, 40000시간 - 143 160)
-        b17 = 0
-        b18 = 0
-        
+        b15 = b16 = b17 = b18 = 0
         if "filter_reset" in kwargs:
             reset_type = kwargs["filter_reset"]
-            
             if reset_type == "prefilter":
                 b15 = 135
                 b16 = 208
@@ -152,11 +160,11 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
             else:
                 _LOGGER.error(f"Invalid filter reset type: {reset_type}")
                 return None
-        
-        # Checksum 계산
+
+        # Checksum 계산 (기본값 393에 각 바이트 값을 더함)
         checksum = 393 + b5 + b6 + b7 + b15 + b16 + b17 + b18
 
-        # 전체 명령어 구성
+        # 전체 명령어 구성 (총 46자여야 함)
         payload = (
             f"{b5:02X}{b6:02X}{b7:02X}"
             f"{'00' * 7}"
