@@ -56,6 +56,11 @@ class PowerSwitch(SwitchEntity):
         return "mdi:power"
 
     async def async_turn_off(self, **kwargs):
+        """전원 끄기 (현재 상태 저장, 단 켜져 있을 때만)"""
+        if not self.is_on:
+            _LOGGER.debug("[PowerSwitch] 이미 전원이 꺼져 있어 저장 및 전송 생략")
+            return
+            
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
         state = entry_data.get("state", {})
         
@@ -83,11 +88,14 @@ class PowerSwitch(SwitchEntity):
         await self._send_command(mode="off")
     
     async def async_turn_on(self, **kwargs):
-        """전원 켜기 (저장된 팬 속도로 복원)"""
+        """전원 켜기 (저장된 팬 속도와 모드 복원, 단 꺼져 있을 때만)"""
+        if self.is_on:
+            _LOGGER.debug("[PowerSwitch] 이미 전원이 켜져 있어 복원 동작 생략")
+            return
+            
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
     
         # 저장된 디바이스 모드, 팬 속도 가져오기 (없으면 기본값 Normal, 4)
-        
         last_device_mode = entry_data.get("last_device_mode", "Normal")
         if last_device_mode == "Normal":
             last_fan_speed = entry_data.get("last_fan_speed", 4)
