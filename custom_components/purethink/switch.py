@@ -14,7 +14,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         PowerSwitch(hass, config_entry, entry_data["command_topic"])
     ]
     async_add_entities(switches)
-    entry_data["entities"].extend(switches)
+    entry_data.setdefault("entities", []).extend(switches)
 
 class PowerSwitch(SwitchEntity):
     """전원 스위치"""
