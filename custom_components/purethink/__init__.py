@@ -124,4 +124,32 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return False
 
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch", "select", "binary_sensor"])
+
+    #필터 리셋
+    async def handle_reset_filter(call):
+        try:
+            filter_type = call.data.get("filter_type", "").strip().lower()
+            _LOGGER.debug(f"[Service] 필터 리셋 요청: filter_type={filter_type}")
+
+            entry_id, entry_data = next(
+                (k, v) for k, v in hass.data[DOMAIN].items()
+                if isinstance(v, dict) and "state" in v and "command_topic" in v
+            )
+
+            device_id = entry_data["command_topic"].split("/")[2]
+            command_topic = entry_data["command_topic"]
+
+            payload = generate_command(device_id, hass, filter_reset=filter_type)
+            if payload:
+                mqtt_client.publish(command_topic, payload, qos=1)
+                _LOGGER.debug(f"[Service] 필터 리셋 명령 전송 ▶ {payload}")
+            else:
+                _LOGGER.error(f"[Service] 필터 리셋 명령 생성 실패")
+
+        except Exception as e:
+            _LOGGER.error(f"[Service] 필터 리셋 처리 중 오류 발생: {e}", exc_info=True)
+            raise
+
+    hass.services.async_register(DOMAIN, "reset_filter", handle_reset_filter)
+    
     return True
