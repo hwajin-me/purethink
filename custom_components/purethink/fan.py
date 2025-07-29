@@ -27,7 +27,7 @@ class PurethinkFan(FanEntity):
         self._command_topic = command_topic
         self._attr_unique_id = f"{self._config['device_id']}_fan"
         self._attr_name = self._config['friendly_name']
-        self._attr_is_on = entry_data["state"].get("power", 0) == 1
+        self._attr_is_on = entry_data["state"].get("power", 0) == 1 and entry_data["state"].get("fan_in", 0) != 0 and entry_data["state"].get("fan_out", 0)
         self._attr_percentage = 0
 
     async def async_added_to_hass(self):
@@ -83,7 +83,7 @@ class PurethinkFan(FanEntity):
             speed = 0
         else:
             # 백분율을 FAN_SPEEDS 리스트의 인덱스(1-5)로 변환
-            speed = ordered_list_item_to_percentage(FAN_SPEEDS[1:], percentage) + 1
+            speed = ordered_list_item_to_percentage(FAN_SPEEDS[1:], percentage_to_ordered_list_item(FAN_SPEEDS[1:], percentage)) + 1
 
         payload = generate_command(self._config['device_id'], self.hass, fan_speed=int(speed / 20))
         mqtt_client.publish(self._command_topic, payload, qos=1)
