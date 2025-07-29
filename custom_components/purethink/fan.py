@@ -13,21 +13,21 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     entry_data = hass.data[DOMAIN][config_entry.entry_id]
     device_info = entry_data["device"]
     command_topic = entry_data["command_topic"]
-    async_add_entities([PurethinkFan(config_entry, device_info, command_topic)])
+    async_add_entities([PurethinkFan(config_entry, entry_data, device_info, command_topic)])
 
 class PurethinkFan(FanEntity):
     _attr_preset_modes = ["Manual", "Auto", "Sleep 1", "Sleep 2", "Sleep 3"]
     _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE
     _attr_speed_count = len(FAN_SPEEDS) - 1 # 'Off'를 제외한 실제 속도 단계 수
 
-    def __init__(self, config_entry, device_info, command_topic):
+    def __init__(self, config_entry, entry_data, device_info, command_topic):
         self._config_entry = config_entry
         self._config = config_entry.data
         self._device_info = device_info
         self._command_topic = command_topic
         self._attr_unique_id = f"{self._config['device_id']}_fan"
         self._attr_name = self._config['friendly_name']
-        self._attr_is_on = False
+        self._attr_is_on = entry_data["state"].get("power", 0) == 1
         self._attr_percentage = 0
 
     async def async_added_to_hass(self):
