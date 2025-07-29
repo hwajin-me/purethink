@@ -88,10 +88,10 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
         # device_mode에 따른 ai_mode, sleep_mode 설정
         if "device_mode" in kwargs:
             mode = kwargs["device_mode"]
-            if mode == "Normal":
+            if mode == "Manual":
                 kwargs["ai_mode"] = 0
                 kwargs["sleep_mode"] = 0
-            elif mode == "AI Mode":
+            elif mode == "Auto":
                 kwargs["ai_mode"] = 1
                 kwargs["sleep_mode"] = 0
             elif "Sleep" in mode:
@@ -113,10 +113,10 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
         # fan_mode 문자열을 흡기/배기 비트로 변환
         if "fan_mode" in kwargs:
             kwargs["fan_in"], kwargs["fan_out"] = {
-                "흡기Off-배기Off": (0, 0),
-                "흡기Off-배기On":  (0, 1),
-                "흡기On-배기Off":  (1, 0),
-                "흡기On-배기On":   (1, 1)
+                "환기 꺼짐": (0, 0),
+                "배기 전용":  (0, 1),
+                "흡기 전용":  (1, 0),
+                "흡/배기":   (1, 1)
             }.get(kwargs["fan_mode"], (0, 0))
 
         # 기존 상태와 새로운 인자 합치기

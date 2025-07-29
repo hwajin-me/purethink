@@ -70,16 +70,13 @@ class BaseSelect(SelectEntity):
             _LOGGER.error(f"[{self.__class__.__name__}] 명령 전송 실패: {e}", exc_info=True)
 
 
-
-
-
 class FanModeSelect(SelectEntity):
     
     FAN_MODES = {
         (0, 0): "환기 꺼짐",
         (0, 1): "배기 전용",
         (1, 0): "흡기 전용",
-        (1, 1): "흡/배기 순환"
+        (1, 1): "흡/배기"
     }
 
     def __init__(self, entry, command_topic, device_info):
