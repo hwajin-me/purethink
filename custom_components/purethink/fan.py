@@ -18,7 +18,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class PurethinkFan(FanEntity):
     _attr_preset_modes = ["Manual", "Auto", "Sleep 1", "Sleep 2", "Sleep 3"]
     _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE | FanEntityFeature.TURN_ON | FanEntityFeature.TURN_OFF
-    _attr_speed_count = len(FAN_SPEEDS) - 1 # 'Off'를 제외한 실제 속도 단계 수
+    _attr_speed_count = len(FAN_SPEEDS)
     
     def __init__(self, config_entry, entry_data, device_info, command_topic):
         self._config_entry = config_entry
@@ -41,17 +41,11 @@ class PurethinkFan(FanEntity):
 
     def _handle_update(self):
         state = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"]
-        self._attr_is_on = state.get("power", 0) == 1
+        self._attr_is_on = state.get("power", 0) == 1 and state.get("fan_mode", "환기 꺼짐") != "환기 꺼짐"
 
         # 장치로부터 받은 숫자 속도(0-5)를 백분율로 변환
-        # FAN_SPEEDS 리스트에서 'Off'를 제외한 실제 속도 단계에 매핑
         fan_speed_index = state.get("fan_speed", 0)
-        if fan_speed_index == 0:
-            self._attr_percentage = 0
-        else:
-            self._attr_percentage = ordered_list_item_to_percentage(
-                FAN_SPEEDS[1:], fan_speed_index - 1
-            )
+        self._attr_percentage = percentage_to_ordered_list_item(fan_speed_index, 0)
 
         ai_mode = state.get("ai_mode", 0)
         sleep_mode = state.get("sleep_mode", 0)
@@ -71,21 +65,16 @@ class PurethinkFan(FanEntity):
         elif preset_mode is not None:
             await self.async_set_preset_mode(preset_mode)
         else:
-            payload = generate_command(self._config['device_id'], self.hass, fan_speed=1, power=1, fan_mode="흡/배기")
+            payload = generate_command(self._config['device_id'], self.hass, power=1, fan_mode="흡/배기")
             mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_turn_off(self, **kwargs):
-        payload = generate_command(self._config['device_id'], self.hass, fan_speed=0, power=1, fan_mode="환기 꺼짐")
+        payload = generate_command(self._config['device_id'], self.hass, fan_mode="환기 꺼짐")
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_percentage(self, percentage: int):
-        if percentage == 0:
-            speed = 0
-        else:
-            # 백분율을 FAN_SPEEDS 리스트의 인덱스(1-5)로 변환
-            speed = ordered_list_item_to_percentage(FAN_SPEEDS[1:], percentage_to_ordered_list_item(FAN_SPEEDS[1:], percentage)) + 1
-
-        payload = generate_command(self._config['device_id'], self.hass, fan_speed=int(speed / 20))
+        speed = FAN_SPEEDS.index(percentage_to_ordered_list_item(FAN_SPEEDS, percentage))
+        payload = generate_command(self._config['device_id'], self.hass, fan_speed=speed)
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_preset_mode(self, preset_mode: str):
