@@ -9,14 +9,17 @@ from . import mqtt_client
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
-    async_add_entities([PurethinkFan(config_entry)])
+    entry_data = hass.data[DOMAIN][config_entry.entry_id]
+    device_info = entry_data["device"]
+    command_topic = entry_data["command_topic"]
+    async_add_entities([PurethinkFan(config_entry, device_info, command_topic)])
 
 class PurethinkFan(FanEntity):
-    def __init__(self, config_entry):
+    def __init__(self, config_entry, device_info, command_topic):
         self._config_entry = config_entry
         self._config = config_entry.data
-        self._device_info = self.hass.data[DOMAIN][config_entry.entry_id]["device"]
-        self._command_topic = self.hass.data[DOMAIN][config_entry.entry_id]["command_topic"]
+        self._device_info = device_info
+        self._command_topic = command_topic
         self._attr_unique_id = f"{self._config['device_id']}_fan"
         self._attr_name = self._config['friendly_name']
         self._attr_is_on = False
