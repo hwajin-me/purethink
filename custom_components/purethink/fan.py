@@ -58,15 +58,21 @@ class PurethinkFan(FanEntity):
             self._attr_preset_mode = "Manual"
 
         self.schedule_update_ha_state()
+        
+    async def async_toggle(self, **kwargs) -> None:
+        if self._attr_is_on is True:
+            await self.async_turn_off(kwargs)
+        else:
+            await self.async_turn_on(kwargs)
 
     async def async_turn_on(self, percentage: int | None = None, preset_mode: str | None = None, **kwargs):
+        payload = generate_command(self._config['device_id'], self.hass, power=1, fan_mode="흡/배기")
+        mqtt_client.publish(self._command_topic, payload, qos=1)
+        
         if percentage is not None:
             await self.async_set_percentage(percentage)
         elif preset_mode is not None:
             await self.async_set_preset_mode(preset_mode)
-        else:
-            payload = generate_command(self._config['device_id'], self.hass, power=1, fan_mode="흡/배기")
-            mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_turn_off(self, **kwargs):
         payload = generate_command(self._config['device_id'], self.hass, fan_mode="환기 꺼짐")
