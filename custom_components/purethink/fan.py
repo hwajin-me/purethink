@@ -29,6 +29,11 @@ class PurethinkFan(FanEntity):
         self._attr_name = self._config['friendly_name']
         self._attr_is_on = entry_data["state"].get("power", 0) == 1 and (int(entry_data["state"].get("fan_in", 0)) == 1 or int(entry_data["state"].get("fan_out", 0)) == 1)
         self._attr_percentage = 0
+        
+    @property
+    def is_on(self):
+        state = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"]
+        return state.get("power", 0) == 1 and (int(state.get("fan_in", 0)) == 1 or int(state.get("fan_out", 0)) == 1)        
 
     async def async_added_to_hass(self):
         self.async_on_remove(
