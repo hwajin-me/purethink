@@ -27,7 +27,7 @@ class PurethinkFan(FanEntity):
         self._command_topic = command_topic
         self._attr_unique_id = f"{self._config['device_id']}_fan"
         self._attr_name = self._config['friendly_name']
-        self._attr_is_on = entry_data["state"].get("power", 0) == 1 and entry_data["state"].get("fan_in", 0) != 0 and entry_data["state"].get("fan_out", 0) != 0
+        self._attr_is_on = entry_data["state"].get("power", 0) == 1 and (int(entry_data["state"].get("fan_in", 0)) == 1 or int(entry_data["state"].get("fan_out", 0)) == 1)
         self._attr_percentage = 0
 
     async def async_added_to_hass(self):
@@ -41,7 +41,7 @@ class PurethinkFan(FanEntity):
 
     def _handle_update(self):
         state = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"]
-        self._attr_is_on = state.get("power", 0) == 1 and state.get("fan_in", 0) != 0 and state.get("fan_out", 0) != 0
+        self._attr_is_on = state.get("power", 0) == 1 and (int(state.get("fan_in", 0)) == 1 or int(state.get("fan_out", 0)) == 1)
 
         # 장치로부터 받은 숫자 속도(0-5)를 백분율로 변환
         fan_speed_index = state.get("fan_speed", 0)
