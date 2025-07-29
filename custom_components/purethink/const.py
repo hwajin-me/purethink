@@ -6,7 +6,7 @@ CHECKSUM_BASE = 0x393
 
 # 옵션 리스트
 PRESSURE_MODES = ["정압 모드", "양압 모드", "음압 모드"]
-FAN_SPEEDS = ["0", "1", "2", "3", "4", "5"]
+FAN_SPEEDS = ["Off", "Low", "Medium", "High", "Max"]
 SLEEP_MODES = ["Off", "1", "2", "3"]
 
 # 로깅 포맷
