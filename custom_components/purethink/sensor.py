@@ -15,8 +15,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         AirQualitySensor(config_entry, device_info, "pm10", "µg/m³", "mdi:weather-dust"),
         AirQualitySensor(config_entry, device_info, "odor", "level", "mdi:scent"),
         WifiSensor(config_entry, device_info, "wifi", "%", "mdi:wifi"),
-        FilterSensor(config_entry, device_info, "prefilter", "시간", "mdi:air-filter"),
-        FilterSensor(config_entry, device_info, "hepafilter", "시간", "mdi:air-filter"),
+        FilterSensor(config_entry, device_info, "prefilter", "hours", "mdi:clock"),
+        FilterSensor(config_entry, device_info, "hepafilter", "hours", "mdi:clock"),
         AlarmSensor(config_entry, device_info, "filter", None, "mdi:alert-circle-outline"),
         AlarmSensor(config_entry, device_info, "fan", None, "mdi:fan-alert")
     ]
@@ -56,12 +56,12 @@ class BaseSensor(SensorEntity):
 
 class AirQualitySensor(BaseSensor):
 
-    def __init__(self, entry, sensor_type, unit, icon):
-        super().__init__(entry, sensor_type, unit, icon)
+    def __init__(self, entry, device_info, sensor_type, unit, icon):
+        super().__init__(entry, device_info, sensor_type, unit, icon)
 
 class WifiSensor(BaseSensor):
-    def __init__(self, entry, sensor_type, unit, icon):
-        super().__init__(entry, sensor_type, unit, icon)
+    def __init__(self, entry, device_info, sensor_type, unit, icon):
+        super().__init__(entry, device_info, sensor_type, unit, icon)
 
     def _update_state(self):
         state = self.hass.data[DOMAIN][self._entry.entry_id].get("state", {})
