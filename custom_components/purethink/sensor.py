@@ -7,24 +7,26 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     entry_data = hass.data[DOMAIN][config_entry.entry_id]
+    device_info = entry_data["device"]
     sensors = [
-        AirQualitySensor(config_entry, "co2", "ppm", "mdi:molecule-co2"),
-        AirQualitySensor(config_entry, "pm1", "µg/m³", "mdi:weather-dust"),
-        AirQualitySensor(config_entry, "pm25", "µg/m³", "mdi:weather-dust"),
-        AirQualitySensor(config_entry, "pm10", "µg/m³", "mdi:weather-dust"),
-        AirQualitySensor(config_entry, "odor", "level", "mdi:scent"),
-        WifiSensor(config_entry, "wifi", "%", "mdi:wifi"),
-        FilterSensor(config_entry, "prefilter", "시간", "mdi:air-filter"),
-        FilterSensor(config_entry, "hepafilter", "시간", "mdi:air-filter"),
-        AlarmSensor(config_entry, "filter", None, "mdi:alert-circle-outline"),
-        AlarmSensor(config_entry, "fan", None, "mdi:fan-alert")
+        AirQualitySensor(config_entry, device_info, "co2", "ppm", "mdi:molecule-co2"),
+        AirQualitySensor(config_entry, device_info, "pm1", "µg/m³", "mdi:weather-dust"),
+        AirQualitySensor(config_entry, device_info, "pm25", "µg/m³", "mdi:weather-dust"),
+        AirQualitySensor(config_entry, device_info, "pm10", "µg/m³", "mdi:weather-dust"),
+        AirQualitySensor(config_entry, device_info, "odor", "level", "mdi:scent"),
+        WifiSensor(config_entry, device_info, "wifi", "%", "mdi:wifi"),
+        FilterSensor(config_entry, device_info, "prefilter", "시간", "mdi:air-filter"),
+        FilterSensor(config_entry, device_info, "hepafilter", "시간", "mdi:air-filter"),
+        AlarmSensor(config_entry, device_info, "filter", None, "mdi:alert-circle-outline"),
+        AlarmSensor(config_entry, device_info, "fan", None, "mdi:fan-alert")
     ]
     async_add_entities(sensors)
 
 class BaseSensor(SensorEntity):
 
-    def __init__(self, entry, sensor_type, unit=None, icon=None):
+    def __init__(self, entry, device_info, sensor_type, unit=None, icon=None):
         self._entry = entry
+        self._device_info = device_info
         self._sensor_type = sensor_type
         config = entry.data
         self._attr_unique_id = f"{config['device_id']}_{sensor_type}"
@@ -32,6 +34,10 @@ class BaseSensor(SensorEntity):
         self._attr_native_unit_of_measurement = unit
         self._attr_icon = icon
         self._attr_available = False
+
+    @property
+    def device_info(self):
+        return self._device_info
 
     async def async_added_to_hass(self):
         self.async_on_remove(

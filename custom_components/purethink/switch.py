@@ -10,8 +10,9 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """스위치 플랫폼 설정 (비동기)"""
     entry_data = hass.data[DOMAIN][config_entry.entry_id]
+    device_info = entry_data["device"]
     switches = [
-        PowerSwitch(hass, config_entry, entry_data["command_topic"])
+        PowerSwitch(hass, config_entry, entry_data["command_topic"], device_info)
     ]
     async_add_entities(switches)
     entry_data.setdefault("entities", []).extend(switches)
@@ -19,15 +20,20 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class PowerSwitch(SwitchEntity):
     """전원 스위치"""
     
-    def __init__(self, hass, entry, command_topic):
+    def __init__(self, hass, entry, command_topic, device_info):
         self.hass = hass
         self._entry = entry
         self._command_topic = command_topic
+        self._device_info = device_info
         config = entry.data
         self._attr_unique_id = f"{config['device_id']}_power"
         self._attr_name = f"{config['friendly_name']} Power"
         self.entity_id = f"switch.{config['base_id']}_power"
         self._attr_available = False
+
+    @property
+    def device_info(self):
+        return self._device_info
 
     async def async_added_to_hass(self):
         """상태 업데이트 신호 구독"""

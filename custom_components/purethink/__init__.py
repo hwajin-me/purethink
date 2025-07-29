@@ -123,7 +123,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.error(f"[MQTT] 연결 실패: {e}", exc_info=True)
         return False
 
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch", "select", "binary_sensor"])
+    hass.data[DOMAIN][entry.entry_id]["device"] = {
+        "identifiers": {(DOMAIN, config["device_id"])},
+        "name": config["friendly_name"],
+        "manufacturer": "Purethink",
+        "model": "Air Purifier",
+    }
+
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch", "select", "binary_sensor", "fan"])
 
     #필터 리셋
     async def handle_reset_filter(call):
