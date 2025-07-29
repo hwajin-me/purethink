@@ -114,8 +114,8 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
         if "fan_mode" in kwargs:
             kwargs["fan_in"], kwargs["fan_out"] = {
                 "환기 꺼짐": (0, 0),
-                "배기 전용":  (0, 1),
-                "흡기 전용":  (1, 0),
+                "배기":  (0, 1),
+                "흡기":  (1, 0),
                 "흡/배기":   (1, 1)
             }.get(kwargs["fan_mode"], (0, 0))
 
