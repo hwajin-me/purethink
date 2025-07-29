@@ -27,7 +27,7 @@ class PurethinkFan(FanEntity):
         self._command_topic = command_topic
         self._attr_unique_id = f"{self._config['device_id']}_fan"
         self._attr_name = self._config['friendly_name']
-        self._attr_is_on = False
+        self._attr_is_on = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"].get("power", 0) == 1
         self._attr_percentage = 0
 
     async def async_added_to_hass(self):

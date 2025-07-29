@@ -72,7 +72,7 @@ class PowerSwitch(SwitchEntity):
         
         # 현재 디바이스 모드 저장
         if state.get("ai_mode") == 1:
-            entry_data["last_device_mode"] = "AI Mode"
+            entry_data["last_device_mode"] = "Auto"
         elif state.get("sleep_mode") == 1:
             entry_data["last_device_mode"] = "Sleep 1"
         elif state.get("sleep_mode") == 2:
@@ -80,10 +80,10 @@ class PowerSwitch(SwitchEntity):
         elif state.get("sleep_mode") == 3:
             entry_data["last_device_mode"] = "Sleep 3"
         else:
-            entry_data["last_device_mode"] = state.get("device_mode", "Normal")
+            entry_data["last_device_mode"] = state.get("device_mode", "Manual")
         _LOGGER.debug(f"[PowerSwitch] 전원 끄기 -현재 Device Mode 저장: {entry_data['last_device_mode']}")
         
-        if entry_data["last_device_mode"] == "Normal":
+        if entry_data["last_device_mode"] == "Manual":
             current_fan_speed = state.get("fan_speed", 4)
             # Normal모드이면서 현재 팬 속도가 0이 아니면 팬속도 저장
             if current_fan_speed != 0:
@@ -102,8 +102,8 @@ class PowerSwitch(SwitchEntity):
         entry_data = self.hass.data[DOMAIN][self._entry.entry_id]
     
         # 저장된 디바이스 모드, 팬 속도 가져오기 (없으면 기본값 Normal, 4)
-        last_device_mode = entry_data.get("last_device_mode", "Normal")
-        if last_device_mode == "Normal":
+        last_device_mode = entry_data.get("last_device_mode", "Manual")
+        if last_device_mode == "Manual":
             last_fan_speed = entry_data.get("last_fan_speed", 4)
             await self._send_command(mode="on", fan_speed=last_fan_speed,device_mode=last_device_mode)
             _LOGGER.debug(f"[PowerSwitch] 전원 켜짐 - 저장된 Fan Speed 복원: {last_fan_speed}, 저장된 Device Mode 복원: {last_device_mode}")
