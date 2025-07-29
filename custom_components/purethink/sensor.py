@@ -72,8 +72,8 @@ class WifiSensor(BaseSensor):
         
 class FilterSensor(BaseSensor):
 
-    def __init__(self, entry, filter_type, unit, icon):
-        super().__init__(entry, f"{filter_type}", unit, icon)
+    def __init__(self, entry, device_info, filter_type, unit, icon):
+        super().__init__(entry, device_info, f"{filter_type}", unit, icon)
         self.filter_type = filter_type
         
     def _update_state(self):
@@ -91,8 +91,8 @@ class FilterSensor(BaseSensor):
 
 class AlarmSensor(BaseSensor):
 
-    def __init__(self, entry, alarm_type, unit=None, icon=None):
-        super().__init__(entry, f"{alarm_type}_alarm", unit, icon)
+    def __init__(self, entry, device_info, alarm_type, unit=None, icon=None):
+        super().__init__(entry, device_info, f"{alarm_type}_alarm", unit, icon)
         self._alarm_type = alarm_type
 
     def _update_state(self):
