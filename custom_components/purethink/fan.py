@@ -17,9 +17,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
 class PurethinkFan(FanEntity):
     _attr_preset_modes = ["Manual", "Auto", "Sleep 1", "Sleep 2", "Sleep 3"]
-    _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE
+    _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE | FanEntityFeature.TURN_ON | FanEntityFeature.TURN_OFF
     _attr_speed_count = len(FAN_SPEEDS) - 1 # 'Off'를 제외한 실제 속도 단계 수
-
+    
     def __init__(self, config_entry, entry_data, device_info, command_topic):
         self._config_entry = config_entry
         self._config = config_entry.data
@@ -83,9 +83,9 @@ class PurethinkFan(FanEntity):
             speed = 0
         else:
             # 백분율을 FAN_SPEEDS 리스트의 인덱스(1-5)로 변환
-            speed = percentage_to_ordered_list_item(FAN_SPEEDS[1:], percentage) + 1
+            speed = ordered_list_item_to_percentage(FAN_SPEEDS[1:], percentage) + 1
 
-        payload = generate_command(self._config['device_id'], self.hass, fan_speed=speed)
+        payload = generate_command(self._config['device_id'], self.hass, fan_speed=speed / 20)
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_preset_mode(self, preset_mode: str):
