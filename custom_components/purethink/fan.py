@@ -71,11 +71,11 @@ class PurethinkFan(FanEntity):
         elif preset_mode is not None:
             await self.async_set_preset_mode(preset_mode)
         else:
-            payload = generate_command(self._config['device_id'], self.hass, power=1)
+            payload = generate_command(self._config['device_id'], self.hass, fan_speed=1, power=1, fan_mode="흡/배기")
             mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_turn_off(self, **kwargs):
-        payload = generate_command(self._config['device_id'], self.hass, power=0)
+        payload = generate_command(self._config['device_id'], self.hass, fan_speed=0, power=1, fan_mode="환기 꺼짐")
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_percentage(self, percentage: int):
@@ -85,7 +85,7 @@ class PurethinkFan(FanEntity):
             # 백분율을 FAN_SPEEDS 리스트의 인덱스(1-5)로 변환
             speed = ordered_list_item_to_percentage(FAN_SPEEDS[1:], percentage) + 1
 
-        payload = generate_command(self._config['device_id'], self.hass, fan_speed=speed / 20)
+        payload = generate_command(self._config['device_id'], self.hass, fan_speed=int(speed / 20))
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_preset_mode(self, preset_mode: str):
