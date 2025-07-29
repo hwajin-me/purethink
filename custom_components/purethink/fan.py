@@ -2,6 +2,7 @@
 import logging
 from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.util.percentage import ordered_list_item_to_percentage, percentage_to_ordered_list_item
 from .const import DOMAIN, FAN_SPEEDS
 from .protocol import generate_command
 from . import mqtt_client
@@ -17,7 +18,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class PurethinkFan(FanEntity):
     _attr_preset_modes = ["Manual", "Auto", "Sleep 1", "Sleep 2", "Sleep 3"]
     _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE
-    _attr_percentage_step = 20
+    _attr_speed_count = len(FAN_SPEEDS) - 1 # 'Off'를 제외한 실제 속도 단계 수
 
     def __init__(self, config_entry, device_info, command_topic):
         self._config_entry = config_entry
@@ -41,7 +42,16 @@ class PurethinkFan(FanEntity):
     def _handle_update(self):
         state = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"]
         self._attr_is_on = state.get("power", 0) == 1
-        self._attr_percentage = round(state.get("fan_speed", 0) * 20)
+
+        # 장치로부터 받은 숫자 속도(0-5)를 백분율로 변환
+        # FAN_SPEEDS 리스트에서 'Off'를 제외한 실제 속도 단계에 매핑
+        fan_speed_index = state.get("fan_speed", 0)
+        if fan_speed_index == 0:
+            self._attr_percentage = 0
+        else:
+            self._attr_percentage = ordered_list_item_to_percentage(
+                FAN_SPEEDS[1:], fan_speed_index - 1
+            )
 
         ai_mode = state.get("ai_mode", 0)
         sleep_mode = state.get("sleep_mode", 0)
@@ -57,8 +67,7 @@ class PurethinkFan(FanEntity):
 
     async def async_turn_on(self, percentage: int | None = None, preset_mode: str | None = None, **kwargs):
         if percentage is not None:
-            speed = int(percentage / 100 * (len(FAN_SPEEDS) - 1))
-            await self.async_set_percentage(speed)
+            await self.async_set_percentage(percentage)
         elif preset_mode is not None:
             await self.async_set_preset_mode(preset_mode)
         else:
@@ -70,8 +79,12 @@ class PurethinkFan(FanEntity):
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_percentage(self, percentage: int):
-        # 백분율(0-100)을 장치 속도(0-5)로 변환
-        speed = round(percentage / 20)
+        if percentage == 0:
+            speed = 0
+        else:
+            # 백분율을 FAN_SPEEDS 리스트의 인덱스(1-5)로 변환
+            speed = percentage_to_ordered_list_item(FAN_SPEEDS[1:], percentage) + 1
+
         payload = generate_command(self._config['device_id'], self.hass, fan_speed=speed)
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
