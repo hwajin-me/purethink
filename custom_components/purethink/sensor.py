@@ -14,7 +14,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         AirQualitySensor(config_entry, device_info, "pm25", "PM 2.5", "µg/m³", "mdi:weather-dust"),
         AirQualitySensor(config_entry, device_info, "pm10", "PM 10.0", "µg/m³", "mdi:weather-dust"),
         AirQualitySensor(config_entry, device_info, "odor", "Odor", "level", "mdi:scent"),
-        WifiSensor(config_entry, device_info, "wifi", "%", "Wi-Fi Signal", "mdi:wifi"),
+        WifiSensor(config_entry, device_info, "wifi", "Wi-Fi Signal", "%", "mdi:wifi"),
         FilterSensor(config_entry, device_info, "prefilter", "Pre Filter Used Tine", "hours", "mdi:clock"),
         FilterSensor(config_entry, device_info, "hepafilter", "HEPA Filter Used Time", "hours", "mdi:clock"),
         AlarmSensor(config_entry, device_info, "filter", "Filter Alarm", None, "mdi:alert-circle-outline"),
