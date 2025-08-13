@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def parse_status_packet(payload: str) -> dict:
     """상태 패킷 파싱 (전체 필드 구현)"""
-    _LOGGER.debug(f"Parsing raw packet: {payload[:24]}...")
+    _LOGGER.debug(f"Parsing raw packet: {payload}...")
     try:
         return {
             # 5번째 바이트 (0x21) - 전원, 팬 속도, AI 모드, 수면 모드, 입력 감지
