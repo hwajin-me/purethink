@@ -14,6 +14,10 @@ _LOGGER = logging.getLogger(__name__)
 MQTT_BROKER = "dapt.iptime.org"
 MQTT_PORT = 8885
 
+context = ssl.create_default_context()
+context.check_hostname = False  # ✅ 호스트 이름 검증 비활성화
+context.verify_mode = ssl.CERT_NONE  # ✅ 인증서 검증 비활성화
+
 # MQTT 클라이언트 초기화
 mqtt_client = mqtt.Client()
 mqtt_client.enable_logger(_LOGGER)
@@ -107,9 +111,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # TLS 설정 (인증서 검증 비활성화)
     try:
-        context = ssl.create_default_context()
-        context.check_hostname = False  # ✅ 호스트 이름 검증 비활성화
-        context.verify_mode = ssl.CERT_NONE  # ✅ 인증서 검증 비활성화
         mqtt_client.tls_set_context(context)
     except Exception as e:
         _LOGGER.error(f"[MQTT] TLS 설정 오류: {e}", exc_info=True)
