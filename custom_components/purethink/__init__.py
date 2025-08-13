@@ -1,10 +1,12 @@
-import logging
 import json
+import logging
 import ssl
+
 import paho.mqtt.client as mqtt
-from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+
 from .const import DOMAIN
 from .protocol import parse_status_packet, generate_command
 
@@ -25,10 +27,11 @@ mqtt_client.enable_logger(_LOGGER)
 def on_connect(client, userdata, flags, rc):
     """MQTT 연결 시 실행"""
     if rc == 0:
-        _LOGGER.info("[MQTT] 연결 성공")
+        _LOGGER.debug(f"[MQTT] 연결 성공 {userdata}")
         client.subscribe(userdata["status_topic"])
     else:
         _LOGGER.error(f"[MQTT] 연결 실패 (코드 {rc})")
+
 
 def on_message(client, userdata, msg):
     """MQTT 메시지 수신 핸들러"""
@@ -43,7 +46,8 @@ def on_message(client, userdata, msg):
 
         payload_hex = payload_json["contents"]
 
-        if not payload_hex.startswith("A8A81721"):
+        if not payload_hex.startswith("A8A81721") and not payload_hex.startswith("A8A81722"):
+            _LOGGER.warning(f"[MQTT] 잘못된 패킷 시작: {payload_hex}")
             return
 
         parsed = parse_status_packet(payload_hex)
@@ -70,10 +74,12 @@ def on_message(client, userdata, msg):
             f"{DOMAIN}_state_update_{userdata['entry_id']}"
         )
 
+        _LOGGER.debug(f"[MQTT] 상태 업데이트: {full_state}")
+        _LOGGER.debug(f"[MQTT] 상태 업데이트 토픽: {userdata['status_topic']}")
+        _LOGGER.debug(f"[MQTT] HASS 데이터: {hass.data[DOMAIN][userdata['entry_id']]}")
+
     except Exception as e:
         _LOGGER.error(f"[MQTT] 메시지 처리 실패: {e}", exc_info=True)
-
-
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -81,7 +87,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug(f"Initializing entry: {entry.data}")
     config = entry.data
     device_id = config["device_id"]
-    
+
     # MQTT 토픽 설정
     base_topic = f"/things/{device_id}"
     status_topic = f"{base_topic}/shadow"
@@ -99,7 +105,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "status_topic": status_topic,
         "command_topic": command_topic
     }
-    
+
     # MQTT 클라이언트 설정
     mqtt_client.user_data_set({
         "hass": hass,
@@ -118,8 +124,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # MQTT 연결
     try:
-        mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)  # ✅ 동기 연결
+        mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 120)  # ✅ 동기 연결
         mqtt_client.loop_start()
+        _LOGGER.debug(f"[MQTT] 연결 시도: {MQTT_BROKER}:{MQTT_PORT}")
     except Exception as e:
         _LOGGER.error(f"[MQTT] 연결 실패: {e}", exc_info=True)
         return False
@@ -128,12 +135,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "identifiers": {(DOMAIN, config["device_id"])},
         "name": config["friendly_name"],
         "manufacturer": "Purethink",
-        "model": "Air Purifier",
+        "model": "Air Ventilator",
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch", "select", "binary_sensor", "fan"])
 
-    #필터 리셋
+    # 필터 리셋
     async def handle_reset_filter(call):
         try:
             filter_type = call.data.get("filter_type", "").strip().lower()
@@ -159,5 +166,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             raise
 
     hass.services.async_register(DOMAIN, "reset_filter", handle_reset_filter)
-    
+
     return True
