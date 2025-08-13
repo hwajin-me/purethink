@@ -1,0 +1,20 @@
+services:
+  homeassistant-purethink-2025:
+    container_name: homeassistant-purethink-2025
+    image: "homeassistant/home-assistant:2025.8"
+    volumes:
+      - ./configuration.yaml:/config/configuration.yaml
+      - ../custom_components/purethink:/config/custom_components/purethink
+    restart: unless-stopped
+    privileged: true
+    environment:
+      - TZ=Asia/Seoul
+    ports:
+      - "8123:8123"
+      - "6789:6789"
+    networks:
+      - podman-default
+
+networks:
+  podman-default:
+    external: true

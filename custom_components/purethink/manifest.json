@@ -1,11 +1,15 @@
 {
-    "domain": "purethink",
-    "name": "Purethink Ventilation",
-    "version": "1.7.0",
-    "requirements": ["paho-mqtt"],
-    "dependencies": [],
-    "codeowners": ["@af950833"],
-    "documentation": "https://github.com/af950833/purethink",
-    "config_flow": true,
-    "iot_class": "cloud_polling"
+  "domain": "purethink",
+  "name": "Purethink Ventilation",
+  "version": "1.7.0",
+  "requirements": [
+    "paho-mqtt"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@af950833"
+  ],
+  "documentation": "https://github.com/af950833/purethink",
+  "config_flow": true,
+  "iot_class": "cloud_polling"
 }

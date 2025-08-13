@@ -1,10 +1,11 @@
+import json
 import logging
 import random
-import json
-import binascii
+
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
 
 def parse_status_packet(payload: str) -> dict:
     """상태 패킷 파싱 (전체 필드 구현)"""
@@ -35,13 +36,13 @@ def parse_status_packet(payload: str) -> dict:
             'co2_sensor_alarm': _parse_bits(payload[14:16], 3, 1),
             'filter_alarm': _parse_bits(payload[14:16], 4, 1),
             'heat_exchanger_alarm': _parse_bits(payload[14:16], 5, 1),
-            
+
             # 9-14바이트: 측정값
             'co2': _parse_bits(payload[16:28], 1, 13),
             'pm1': _parse_bits(payload[16:28], 14, 10),
             'pm25': _parse_bits(payload[16:28], 24, 10),
             'pm10': _parse_bits(payload[16:28], 34, 10),
-            
+
             # 15-18바이트: 필터
             'prefilter': _parse_filter(payload[28:36], 2, 14),
             'hepafilter': _parse_filter(payload[28:36], 18, 14)
@@ -50,20 +51,23 @@ def parse_status_packet(payload: str) -> dict:
         _LOGGER.error(f"Packet parsing failed: {str(e)}", exc_info=True)
         raise
 
+
 def _parse_bits(hex_str: str, start_bit: int, length: int) -> int:
     """비트 단위 파싱"""
     try:
-        full_bits = bin(int(hex_str, 16))[2:].zfill(len(hex_str)*4)
-        return int(full_bits[start_bit:start_bit+length], 2)
+        full_bits = bin(int(hex_str, 16))[2:].zfill(len(hex_str) * 4)
+        return int(full_bits[start_bit:start_bit + length], 2)
     except ValueError as e:
         _LOGGER.error(f"Bit parsing error: {hex_str} [{start_bit}:{length}]")
         raise
 
+
 def _parse_filter(hex_str: str, start_bit: int, length: int) -> dict:
     return {
-        'reset_flag': bool(_parse_bits(hex_str, start_bit-2, 1)),
+        'reset_flag': bool(_parse_bits(hex_str, start_bit - 2, 1)),
         'hours': _parse_bits(hex_str, start_bit, length)
     }
+
 
 def generate_command(device_id: str, hass, **kwargs) -> str:
     try:
@@ -114,9 +118,9 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
         if "fan_mode" in kwargs:
             kwargs["fan_in"], kwargs["fan_out"] = {
                 "환기 꺼짐": (0, 0),
-                "배기":  (0, 1),
-                "흡기":  (1, 0),
-                "흡/배기":   (1, 1)
+                "배기": (0, 1),
+                "흡기": (1, 0),
+                "흡/배기": (1, 1)
             }.get(kwargs["fan_mode"], (0, 0))
 
         # 기존 상태와 새로운 인자 합치기
@@ -130,7 +134,7 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
         fan_out = combined.get("fan_out", 0)
 
         topic_id = str(random.randint(100000, 200000))
-        
+
         # B5: 전원, 팬 속도, AI 모드, 수면 모드 (각각 비트 연산 적용)
         bin_power = int(power) << 7
         bin_fan_speed = int(fan_speed) << 4
@@ -173,7 +177,7 @@ def generate_command(device_id: str, hass, **kwargs) -> str:
             f"{checksum:04X}"
         )
         contents = f"A8A81722{payload}"
-            
+
         if len(contents) != 46:
             _LOGGER.warning(f"[generate_command] CMD 길이 불일치: {len(contents)}자 (예상: 46자)")
 

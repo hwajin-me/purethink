@@ -1,12 +1,15 @@
 import logging
+
 from homeassistant.components import mqtt
 from homeassistant.components.select import SelectEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from .const import DOMAIN, FAN_SPEEDS, PRESSURE_MODES
+
+from . import mqtt_client
+from .const import DOMAIN, PRESSURE_MODES
 from .protocol import generate_command
-from . import mqtt_client 
 
 _LOGGER = logging.getLogger(__name__)
+
 
 # custom_components/purethink/select.py
 
@@ -15,24 +18,26 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     command_topic = entry_data["command_topic"]
     device_info = entry_data["device"]
     config = config_entry.data
-    
+
     selects = [
-        BaseSelect(config, command_topic, device_info, "pressure_mode", PRESSURE_MODES, "Pressure Mode", config_entry.entry_id),
+        BaseSelect(config, command_topic, device_info, "pressure_mode", PRESSURE_MODES, "Pressure Mode",
+                   config_entry.entry_id),
         FanModeSelect(config_entry, command_topic, device_info),
     ]
     async_add_entities(selects)
 
 
 class BaseSelect(SelectEntity):
-    
-    def __init__(self, config, command_topic, device_info, entity_type, options, label_suffix, entry_id, default_index=0):
+
+    def __init__(self, config, command_topic, device_info, entity_type, options, label_suffix, entry_id,
+                 default_index=0):
         self._config = config
         self._command_topic = command_topic
         self._device_info = device_info
         self._entity_type = entity_type
         self._entry_id = entry_id
         self._default_index = default_index
-        
+
         self._attr_unique_id = f"{config['device_id']}_{entity_type}"
         self._attr_name = f"{config['friendly_name']} {label_suffix}"
         self._attr_options = options
@@ -43,6 +48,7 @@ class BaseSelect(SelectEntity):
         return self._device_info
 
     async def async_added_to_hass(self):
+        _LOGGER.debug(f"[{self.name}] async_added_to_hass called")
         self.async_on_remove(
             async_dispatcher_connect(
                 self.hass,
@@ -71,7 +77,6 @@ class BaseSelect(SelectEntity):
 
 
 class FanModeSelect(SelectEntity):
-    
     FAN_MODES = {
         (0, 0): "환기 꺼짐",
         (0, 1): "배기",
@@ -95,6 +100,7 @@ class FanModeSelect(SelectEntity):
         return self._device_info
 
     async def async_added_to_hass(self):
+        _LOGGER.debug(f"[{self.name}] async_added_to_hass called")
         self.async_on_remove(
             async_dispatcher_connect(
                 self.hass,
@@ -118,7 +124,7 @@ class FanModeSelect(SelectEntity):
                 self.hass,
                 fan_mode=option
             )
-            mqtt_client.publish (self._command_topic, payload, qos=1)
+            mqtt_client.publish(self._command_topic, payload, qos=1)
             _LOGGER.debug(f"[FanModeSelect] Command sent ▶ {payload}")
         except Exception as e:
             _LOGGER.error(f"[FanModeSelect] 명령 전송 실패: {e}", exc_info=True)
