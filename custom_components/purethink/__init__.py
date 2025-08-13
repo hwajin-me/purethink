@@ -24,6 +24,7 @@ context.verify_mode = ssl.CERT_NONE  # ✅ 인증서 검증 비활성화
 mqtt_client = mqtt.Client()
 mqtt_client.enable_logger(_LOGGER)
 
+
 def on_connect(client, userdata, flags, rc):
     """MQTT 연결 시 실행"""
     if rc == 0:
@@ -35,6 +36,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     """MQTT 메시지 수신 핸들러"""
+    _LOGGER.debug(f"[MQTT] 메시지 수신: {msg.topic} - {msg.payload}")
 
     try:
         payload = msg.payload.decode("utf-8")
@@ -55,6 +57,8 @@ def on_message(client, userdata, msg):
         if not parsed:
             _LOGGER.error(f"[MQTT] 상태 패킷 파싱 실패: {payload_hex}")
             return
+
+        _LOGGER.debug(f"[MQTT] 상태 패킷 파싱 성공: {parsed}")
 
         full_state = {
             **parsed,
@@ -90,7 +94,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # MQTT 토픽 설정
     base_topic = f"/things/{device_id}"
-    status_topic = f"{base_topic}/shadow"
+    status_topic = f"{base_topic}/#"
     command_topic = f"{base_topic}/shadow"
 
     # 상태 저장소 초기화
