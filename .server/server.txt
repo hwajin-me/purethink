@@ -1,0 +1,101 @@
+GET /api/v1/user/exists?userId=brightdelusion%40gmail.com HTTP/1.1
+user-agent: Dart/3.6 (dart:io)
+accept-encoding: gzip
+device-os: iOS
+host: dapt.iptime.org:6002
+content-type: application/json
+app-version: 1020701
+
+
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 20
+ETag: W/"14-Ecg+K51jYZ+OQC+HNx7vjGjk1jk"
+Date: Mon, 18 Aug 2025 10:59:15 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"authType":"email"}
+
+POST /api/v1/auth/ HTTP/1.1
+user-agent: Dart/3.6 (dart:io)
+accept-encoding: gzip
+content-length: 0
+device-os: iOS
+authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU3YmZiMmExMWRkZmZjMGFkMmU2ODE0YzY4NzYzYjhjNjg3NTgxZDgiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHVyZXRoaW5rLWRldiIsImF1ZCI6InB1cmV0aGluay1kZXYiLCJhdXRoX3RpbWUiOjE3NTU1MTQ3ODUsInVzZXJfaWQiOiJKUGxHZW9nNUY4YmdRUUhEbUdTM0J1c3dseGEyIiwic3ViIjoiSlBsR2VvZzVGOGJnUVFIRG1HUzNCdXN3bHhhMiIsImlhdCI6MTc1NTUxNDc4NSwiZXhwIjoxNzU1NTE4Mzg1LCJlbWFpbCI6ImJyaWdodGRlbHVzaW9uQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJicmlnaHRkZWx1c2lvbkBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.XIpbJ55nxqYU2AbsEWZWQYh0sYC00ywevrDM0wjABokN8p_xNPPIohHIIVAP8g3g6Ekk56cZLola7JTCeZzldSQaBMPeg7eL4IoIssYk37A5_gdzHPaXpJs1vMi2VJ-ozPGaF71zooygT0DLZbRj1DT4gJJA4LCFrbSlSxpmYQyLImEoETDfc-Uwos72dtps6FLys6Aylw7TrkJLJQwAKefUCQSSzHuFp7_2WlKCvcaxmn7gmzigwGhCHcPqDj73vGbVRdbBdFpgGUVJeGTtNcUkgP7OyWcONlNzTLIDrv7fj3u9G5Nlvnax17P427zBt3oK8flO572JsfZmLcdvbA
+host: dapt.iptime.org:6002
+content-type: application/json
+app-version: 1020701
+
+
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 20
+ETag: W/"14-Ecg+K51jYZ+OQC+HNx7vjGjk1jk"
+Date: Mon, 18 Aug 2025 10:59:48 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"authType":"email"}
+GET /api/v1/user/profile HTTP/1.1
+user-agent: Dart/3.6 (dart:io)
+accept-encoding: gzip
+device-os: iOS
+authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU3YmZiMmExMWRkZmZjMGFkMmU2ODE0YzY4NzYzYjhjNjg3NTgxZDgiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHVyZXRoaW5rLWRldiIsImF1ZCI6InB1cmV0aGluay1kZXYiLCJhdXRoX3RpbWUiOjE3NTU1MTQ3ODUsInVzZXJfaWQiOiJKUGxHZW9nNUY4YmdRUUhEbUdTM0J1c3dseGEyIiwic3ViIjoiSlBsR2VvZzVGOGJnUVFIRG1HUzNCdXN3bHhhMiIsImlhdCI6MTc1NTUxNDc4NSwiZXhwIjoxNzU1NTE4Mzg1LCJlbWFpbCI6ImJyaWdodGRlbHVzaW9uQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJicmlnaHRkZWx1c2lvbkBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.XIpbJ55nxqYU2AbsEWZWQYh0sYC00ywevrDM0wjABokN8p_xNPPIohHIIVAP8g3g6Ekk56cZLola7JTCeZzldSQaBMPeg7eL4IoIssYk37A5_gdzHPaXpJs1vMi2VJ-ozPGaF71zooygT0DLZbRj1DT4gJJA4LCFrbSlSxpmYQyLImEoETDfc-Uwos72dtps6FLys6Aylw7TrkJLJQwAKefUCQSSzHuFp7_2WlKCvcaxmn7gmzigwGhCHcPqDj73vGbVRdbBdFpgGUVJeGTtNcUkgP7OyWcONlNzTLIDrv7fj3u9G5Nlvnax17P427zBt3oK8flO572JsfZmLcdvbA
+host: dapt.iptime.org:6002
+content-type: application/json
+app-version: 1020701
+
+
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 63
+ETag: W/"3f-0UnjRX6rBXurvsFO5URC1ROEK2M"
+Date: Mon, 18 Aug 2025 10:59:48 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"userId":"brightdelusion@gmail.com","regionCode":"1156058500"}
+GET /api/v1/device/user-devices HTTP/1.1
+user-agent: Dart/3.6 (dart:io)
+accept-encoding: gzip
+device-os: iOS
+authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU3YmZiMmExMWRkZmZjMGFkMmU2ODE0YzY4NzYzYjhjNjg3NTgxZDgiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHVyZXRoaW5rLWRldiIsImF1ZCI6InB1cmV0aGluay1kZXYiLCJhdXRoX3RpbWUiOjE3NTU1MTQ3ODUsInVzZXJfaWQiOiJKUGxHZW9nNUY4YmdRUUhEbUdTM0J1c3dseGEyIiwic3ViIjoiSlBsR2VvZzVGOGJnUVFIRG1HUzNCdXN3bHhhMiIsImlhdCI6MTc1NTUxNDc4NSwiZXhwIjoxNzU1NTE4Mzg1LCJlbWFpbCI6ImJyaWdodGRlbHVzaW9uQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJicmlnaHRkZWx1c2lvbkBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.XIpbJ55nxqYU2AbsEWZWQYh0sYC00ywevrDM0wjABokN8p_xNPPIohHIIVAP8g3g6Ekk56cZLola7JTCeZzldSQaBMPeg7eL4IoIssYk37A5_gdzHPaXpJs1vMi2VJ-ozPGaF71zooygT0DLZbRj1DT4gJJA4LCFrbSlSxpmYQyLImEoETDfc-Uwos72dtps6FLys6Aylw7TrkJLJQwAKefUCQSSzHuFp7_2WlKCvcaxmn7gmzigwGhCHcPqDj73vGbVRdbBdFpgGUVJeGTtNcUkgP7OyWcONlNzTLIDrv7fj3u9G5Nlvnax17P427zBt3oK8flO572JsfZmLcdvbA
+host: dapt.iptime.org:6002
+content-type: application/json
+app-version: 1020701
+
+
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 201
+ETag: W/"c9-zaTtM0saLE1mZb0BudU1JpEk3II"
+Date: Mon, 18 Aug 2025 10:59:48 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[{"mac":511832,"macString":"07CF58","name":"MH","location":"거실","regionCode":"1156058500","deviceType":"purethink","freeFilterCycle":3000,"hepaFilterCycle":6000,"fwVersion":"ver.210826.1530_DIV0"}]
+GET /api/v1/atmospheric/data?regionCode=1156058500 HTTP/1.1
+user-agent: Dart/3.6 (dart:io)
+accept-encoding: gzip
+device-os: iOS
+authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU3YmZiMmExMWRkZmZjMGFkMmU2ODE0YzY4NzYzYjhjNjg3NTgxZDgiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHVyZXRoaW5rLWRldiIsImF1ZCI6InB1cmV0aGluay1kZXYiLCJhdXRoX3RpbWUiOjE3NTU1MTQ3ODUsInVzZXJfaWQiOiJKUGxHZW9nNUY4YmdRUUhEbUdTM0J1c3dseGEyIiwic3ViIjoiSlBsR2VvZzVGOGJnUVFIRG1HUzNCdXN3bHhhMiIsImlhdCI6MTc1NTUxNDc4NSwiZXhwIjoxNzU1NTE4Mzg1LCJlbWFpbCI6ImJyaWdodGRlbHVzaW9uQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJicmlnaHRkZWx1c2lvbkBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.XIpbJ55nxqYU2AbsEWZWQYh0sYC00ywevrDM0wjABokN8p_xNPPIohHIIVAP8g3g6Ekk56cZLola7JTCeZzldSQaBMPeg7eL4IoIssYk37A5_gdzHPaXpJs1vMi2VJ-ozPGaF71zooygT0DLZbRj1DT4gJJA4LCFrbSlSxpmYQyLImEoETDfc-Uwos72dtps6FLys6Aylw7TrkJLJQwAKefUCQSSzHuFp7_2WlKCvcaxmn7gmzigwGhCHcPqDj73vGbVRdbBdFpgGUVJeGTtNcUkgP7OyWcONlNzTLIDrv7fj3u9G5Nlvnax17P427zBt3oK8flO572JsfZmLcdvbA
+host: dapt.iptime.org:6002
+content-type: application/json
+app-version: 1020701
+
+
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 165
+ETag: W/"a5-6HKMWlH0FnI8sKMZIsfwz/Y1T5E"
+Date: Mon, 18 Aug 2025 10:59:48 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"regionCode":"1156058500","weather":"비","temperature":28,"regionName":"서울","city":"영등포구","dongEubMyeon":"도림동","Ozone":0.025,"Pm10":28,"Pm25":11}

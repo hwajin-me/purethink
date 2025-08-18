@@ -33,7 +33,7 @@ class PowerSwitch(SwitchEntity):
         self._attr_unique_id = f"{config['device_id']}_power"
         self._attr_name = f"{config['friendly_name']} Power"
         self.entity_id = f"switch.{config['base_id']}_power"
-        self._attr_available = True
+        self._attr_available = False
 
     @property
     def device_info(self):
