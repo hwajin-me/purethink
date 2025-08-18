@@ -1,6 +1,5 @@
 import logging
 
-from homeassistant.components import mqtt
 from homeassistant.components.select import SelectEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
