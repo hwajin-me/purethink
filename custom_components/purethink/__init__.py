@@ -1,10 +1,12 @@
-import logging
 import json
+import logging
 import ssl
+
 import paho.mqtt.client as mqtt
-from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+
 from .const import DOMAIN
 from .protocol import parse_status_packet, generate_command
 
@@ -18,6 +20,11 @@ MQTT_PORT = 8885
 mqtt_client = mqtt.Client()
 mqtt_client.enable_logger(_LOGGER)
 
+context = ssl.create_default_context()
+context.check_hostname = False  # ✅ 호스트 이름 검증 비활성화
+context.verify_mode = ssl.CERT_NONE  # ✅ 인증서 검증 비활성화
+
+
 def on_connect(client, userdata, flags, rc):
     """MQTT 연결 시 실행"""
     if rc == 0:
@@ -25,6 +32,7 @@ def on_connect(client, userdata, flags, rc):
         client.subscribe(userdata["status_topic"])
     else:
         _LOGGER.error(f"[MQTT] 연결 실패 (코드 {rc})")
+
 
 def on_message(client, userdata, msg):
     """MQTT 메시지 수신 핸들러"""
@@ -70,14 +78,12 @@ def on_message(client, userdata, msg):
         _LOGGER.error(f"[MQTT] 메시지 처리 실패: {e}", exc_info=True)
 
 
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Config Entry 설정"""
     _LOGGER.debug(f"Initializing entry: {entry.data}")
     config = entry.data
     device_id = config["device_id"]
-    
+
     # MQTT 토픽 설정
     base_topic = f"/things/{device_id}"
     status_topic = f"{base_topic}/shadow"
@@ -95,7 +101,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "status_topic": status_topic,
         "command_topic": command_topic
     }
-    
+
     # MQTT 클라이언트 설정
     mqtt_client.user_data_set({
         "hass": hass,
@@ -107,9 +113,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # TLS 설정 (인증서 검증 비활성화)
     try:
-        context = ssl.create_default_context()
-        context.check_hostname = False  # ✅ 호스트 이름 검증 비활성화
-        context.verify_mode = ssl.CERT_NONE  # ✅ 인증서 검증 비활성화
         mqtt_client.tls_set_context(context)
     except Exception as e:
         _LOGGER.error(f"[MQTT] TLS 설정 오류: {e}", exc_info=True)
@@ -132,7 +135,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch", "select", "binary_sensor", "fan"])
 
-    #필터 리셋
+    # 필터 리셋
     async def handle_reset_filter(call):
         try:
             filter_type = call.data.get("filter_type", "").strip().lower()
@@ -158,5 +161,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             raise
 
     hass.services.async_register(DOMAIN, "reset_filter", handle_reset_filter)
-    
+
     return True
