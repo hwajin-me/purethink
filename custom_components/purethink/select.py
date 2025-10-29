@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import time
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -114,10 +116,38 @@ class FanModeSelect(SelectEntity):
         fan_in = state.get("fan_in", 0)
         fan_out = state.get("fan_out", 0)
 
+        _LOGGER.debug(
+            f"[FanModeSelect] State updated: fan_in: {fan_in}, fan_out: {fan_out}, fan_speed: {state.get('fan_speed', 0)}")
+
         self._attr_current_option = self.FAN_MODES.get((fan_in, fan_out), "Fan In-On Fan Out-On")
         self._attr_available = True
-
         self.schedule_update_ha_state()
+
+        # 만약에 팬 속도가 0 인데 state 결과가 환기 꺼짐이 아니라면 끔으로 변경
+        # 처리 하기 전에 1초 대기
+        time.sleep(1)
+        self._adjust_fan_mode(fan_in, fan_out, state)
+
+    def _adjust_fan_mode(self, fan_in, fan_out, state):
+        if (fan_in != 0 or fan_out != 0) and state.get("fan_speed", 0) == 0:
+            _LOGGER.debug(f"[FanModeSelect] 팬 속도 0 감지, 환기 꺼짐으로 변경 {self._entry.data['device_id']}")
+            payload = generate_command(self._entry.data["device_id"],
+                                       self.hass,
+                                       fan_in=0,
+                                       fan_out=0,
+                                       fan_mode="환기 꺼짐",
+                                       mode="Manual")
+            mqtt_client.publish(self._command_topic, payload, qos=1)
+
+        elif state.get("fan_speed", 0) > 0 and (fan_in == 0 or fan_out == 0):
+            _LOGGER.debug(f"[FanModeSelect] 팬 속도 > 0 감지, 흡/배기로 변경 {self._entry.data['device_id']}")
+            payload = generate_command(self._entry.data["device_id"],
+                                       self.hass,
+                                       fan_in=1,
+                                       fan_out=1,
+                                       fan_mode="흡/배기",
+                                       mode="Manual")
+            mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_select_option(self, option: str):
         try:
