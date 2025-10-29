@@ -58,8 +58,6 @@ def on_message(client, userdata, msg):
             _LOGGER.error(f"[MQTT] 상태 패킷 파싱 실패: {payload_hex}")
             return
 
-        _LOGGER.debug(f"[MQTT] 상태 패킷 파싱 성공: {parsed}")
-
         full_state = {
             **parsed,
             "prefilter_hours": parsed.get("prefilter", {}).get("hours", 0),
@@ -67,6 +65,10 @@ def on_message(client, userdata, msg):
             "hepafilter_hours": parsed.get("hepafilter", {}).get("hours", 0),
             "hepafilter_reset": parsed.get("hepafilter", {}).get("reset_flag", 0)
         }
+
+        # CMD Type 이 MCU일 때만 업데이트
+        if payload_json["type"] == "CMD":
+            return
 
         userdata["hass"].data[DOMAIN][userdata["entry_id"]]["state"] = full_state
 
@@ -79,7 +81,6 @@ def on_message(client, userdata, msg):
         )
 
         _LOGGER.debug(f"[MQTT] 상태 업데이트: {full_state}")
-        _LOGGER.debug(f"[MQTT] 상태 업데이트 토픽: {userdata['status_topic']}")
         _LOGGER.debug(f"[MQTT] HASS 데이터: {hass.data[DOMAIN][userdata['entry_id']]}")
 
     except Exception as e:
@@ -94,7 +95,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # MQTT 토픽 설정
     base_topic = f"/things/{device_id}"
-    status_topic = f"{base_topic}/#"
+    status_topic = f"{base_topic}/shadow"
     command_topic = f"{base_topic}/shadow"
 
     # 상태 저장소 초기화
