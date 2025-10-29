@@ -93,6 +93,7 @@ class FanModeSelect(SelectEntity):
         self._attr_options = list(self.FAN_MODES.values())
         self._attr_current_option = "Fan In-Off Fan Out-Off"
         self._attr_available = False
+        self._attr_sync = True
 
     @property
     def device_info(self):

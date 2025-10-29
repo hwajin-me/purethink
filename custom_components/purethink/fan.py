@@ -92,6 +92,8 @@ class PurethinkFan(FanEntity):
     async def async_set_percentage(self, percentage: int):
         if percentage == 0:
             self._attr_is_on = False
+        else:
+            self._attr_is_on = True
 
         speed = FAN_SPEEDS.index(percentage_to_ordered_list_item(FAN_SPEEDS[1:], percentage)) if percentage != 0 else 0
         payload = generate_command(self._config['device_id'], self.hass,
