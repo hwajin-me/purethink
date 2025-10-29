@@ -116,16 +116,16 @@ class FanModeSelect(SelectEntity):
         self._attr_current_option = self.FAN_MODES.get((fan_in, fan_out), "Fan In-On Fan Out-On")
         self._attr_available = True
 
-        # 만약에 팬 속도가 0 인데 state 결과가 환기 꺼짐이 아니라면 끔으로 변경
-        if (fan_in != 0 or fan_out != 0) and state.get("fan_speed", 0) == 0:
-            payload = generate_command(self._entry.data["device_id"], self.hass, fan_mode="환기 꺼짐", mode="Manual")
-            mqtt_client.publish(self._command_topic, payload, qos=1)
-
-        # 팬 속도가 0보다 크면 흡/배기 ON
-        elif state.get("fan_speed", 0) > 0:
-            payload = generate_command(self._entry.data["device_id"], self.hass, fan_mode="흡/배기",
-                                       mode="Manual")
-            mqtt_client.publish(self._command_topic, payload, qos=1)
+        # # 만약에 팬 속도가 0 인데 state 결과가 환기 꺼짐이 아니라면 끔으로 변경
+        # if (fan_in != 0 or fan_out != 0) and state.get("fan_speed", 0) == 0:
+        #     payload = generate_command(self._entry.data["device_id"], self.hass, fan_mode="환기 꺼짐", mode="Manual")
+        #     mqtt_client.publish(self._command_topic, payload, qos=1)
+        #
+        # # 팬 속도가 0보다 크면 흡/배기 ON
+        # elif state.get("fan_speed", 0) > 0:
+        #     payload = generate_command(self._entry.data["device_id"], self.hass, fan_mode="흡/배기",
+        #                                mode="Manual")
+        #     mqtt_client.publish(self._command_topic, payload, qos=1)
 
         self.schedule_update_ha_state()
 

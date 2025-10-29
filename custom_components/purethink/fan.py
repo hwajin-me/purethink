@@ -97,8 +97,10 @@ class PurethinkFan(FanEntity):
         payload = generate_command(self._config['device_id'], self.hass,
                                    fan_speed=speed, mode="Manual") if speed != 0 else generate_command(
             self._config['device_id'],
-            self.hass, fan_mode="환기 꺼짐",
-            fan_speed=0, mode="Manual")
+            self.hass,
+            fan_mode="환기 꺼짐",
+            fan_speed=0,
+            mode="Manual")
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_preset_mode(self, preset_mode: str):
