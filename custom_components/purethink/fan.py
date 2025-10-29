@@ -52,6 +52,8 @@ class PurethinkFan(FanEntity):
         state = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"]
         self._attr_is_on = state.get("power", 0) == 1 and (
                 int(state.get("fan_in", 0)) == 1 or int(state.get("fan_out", 0)) == 1)
+        fan_in = state.get("fan_in", 0)
+        fan_out = state.get("fan_out", 0)
 
         # 장치로부터 받은 숫자 속도(0-5)를 백분율로 변환
         fan_speed_index = state.get("fan_speed", 0)
@@ -67,6 +69,18 @@ class PurethinkFan(FanEntity):
             self._attr_preset_mode = f"Sleep {sleep_mode}"
         else:
             self._attr_preset_mode = "Manual"
+
+        # 만약에 팬 속도가 0 인데 state 결과가 환기 꺼짐이 아니라면 끔으로 변경
+        if (fan_in != 0 or fan_out != 0) and state.get("fan_speed", 0) == 0:
+            payload = generate_command(self._entry.data["device_id"], self.hass, fan_mode="환기 꺼짐", mode="Manual")
+            mqtt_client.publish(self._command_topic, payload, qos=1)
+
+        # 팬 속도가 0보다 큰데 흡/배기 상태가 아니라면 흡/배기로 변경
+        elif state.get("fan_speed", 0) > 0 and (fan_in == 0 and fan_out == 0):
+            payload = generate_command(self._entry.data["device_id"], self.hass,
+                                       fan_mode="흡/배기",
+                                       mode="Manual")
+            mqtt_client.publish(self._command_topic, payload, qos=1)
 
         self.schedule_update_ha_state()
 
