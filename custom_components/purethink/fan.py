@@ -31,7 +31,7 @@ class PurethinkFan(FanEntity):
         self._attr_unique_id = f"{self._config['device_id']}_fan"
         self._attr_name = self._config['friendly_name']
         self._attr_is_on = entry_data["state"].get("power", 0) == 1 and (
-                    int(entry_data["state"].get("fan_in", 0)) == 1 or int(entry_data["state"].get("fan_out", 0)) == 1)
+                int(entry_data["state"].get("fan_in", 0)) == 1 or int(entry_data["state"].get("fan_out", 0)) == 1)
         self._attr_percentage = 0
 
     @property
@@ -51,7 +51,7 @@ class PurethinkFan(FanEntity):
     def _handle_update(self):
         state = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"]
         self._attr_is_on = state.get("power", 0) == 1 and (
-                    int(state.get("fan_in", 0)) == 1 or int(state.get("fan_out", 0)) == 1)
+                int(state.get("fan_in", 0)) == 1 or int(state.get("fan_out", 0)) == 1)
 
         # 장치로부터 받은 숫자 속도(0-5)를 백분율로 변환
         fan_speed_index = state.get("fan_speed", 0)
@@ -86,12 +86,19 @@ class PurethinkFan(FanEntity):
             await self.async_set_preset_mode(preset_mode)
 
     async def async_turn_off(self, **kwargs):
-        payload = generate_command(self._config['device_id'], self.hass, fan_mode="환기 꺼짐")
+        payload = generate_command(self._config['device_id'], self.hass, fan_mode="환기 꺼짐", fan_speed=0, mode="Manual")
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_percentage(self, percentage: int):
+        if percentage == 0:
+            self._attr_is_on = False
+
         speed = FAN_SPEEDS.index(percentage_to_ordered_list_item(FAN_SPEEDS[1:], percentage)) if percentage != 0 else 0
-        payload = generate_command(self._config['device_id'], self.hass, fan_speed=speed)
+        payload = generate_command(self._config['device_id'], self.hass,
+                                   fan_speed=speed, mode="Manual") if speed != 0 else generate_command(
+            self._config['device_id'],
+            self.hass, fan_mode="환기 꺼짐",
+            fan_speed=0, mode="Manual")
         mqtt_client.publish(self._command_topic, payload, qos=1)
 
     async def async_set_preset_mode(self, preset_mode: str):
