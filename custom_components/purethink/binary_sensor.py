@@ -58,6 +58,9 @@ class PureThinkModeSensor(BinarySensorEntity):
             )
         )
 
+        if self.hass.data[DOMAIN][self._entry.entry_id].get("state"):
+            self._handle_update()
+
     def _handle_update(self):
         """현재 모드 확인 후 센서 상태 업데이트"""
         state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]

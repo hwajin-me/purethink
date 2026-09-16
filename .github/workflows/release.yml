@@ -1,0 +1,60 @@
+name: Test and release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - name: Install tested Home Assistant and dependencies
+        run: python -m pip install -r requirements.txt 'homeassistant==2025.4.4'
+      - name: Tests, live Mosquitto, embedded TLS broker and 100% coverage
+        env:
+          PURETHINK_LIVE_MQTT: '1'
+        run: python -m pytest --cov=custom_components.purethink --cov-report=term-missing --cov-fail-under=100
+
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Version and package
+        id: package
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          COMMIT_DATE=$(git show -s --format=%cs HEAD)
+          VERSION=$(python -c 'import sys; print(".".join(str(int(p)) for p in sys.argv[1].split("-")) + "." + sys.argv[2])' "$COMMIT_DATE" "$RUN_NUMBER")
+          python scripts/build_release.py --version "$VERSION"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Publish release for the tested commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.package.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            RELEASE_SHA=$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq '.sha')
+            test "$RELEASE_SHA" = "$GITHUB_SHA" || { echo "Tag points to a different commit"; exit 1; }
+            gh release upload "$TAG" dist/purethink.zip --clobber
+          else
+            gh release create "$TAG" dist/purethink.zip --target "$GITHUB_SHA" --title "Purethink $TAG" --generate-notes
+          fi

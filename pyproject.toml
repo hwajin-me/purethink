@@ -13,19 +13,22 @@ markers = [
     "asyncio: marks tests as async tests",
 ]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
 
 [tool.coverage.run]
-source = ["custom_components/korea_incubator"]
+source = ["custom_components/purethink"]
 omit = [
     "tests/*",
-    "custom_components/korea_incubator/translations/*",
+    "custom_components/purethink/translations/*",
 ]
 
 [tool.coverage.report]
+fail_under = 100
+precision = 2
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",

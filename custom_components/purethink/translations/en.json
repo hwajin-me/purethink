@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Purethink Ventilation",
+        "data": {
+          "friendly_name": "Name",
+          "device_id": "Device ID",
+          "mqtt_mode": "MQTT server"
+        }
+      },
+      "local_mqtt": {
+        "title": "Local MQTT server",
+        "data": {
+          "mqtt_host": "Host",
+          "mqtt_port": "Port",
+          "mqtt_username": "Username",
+          "mqtt_password": "Password"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Purethink",
+        "data": {
+          "friendly_name": "Name",
+          "device_id": "Device ID",
+          "mqtt_mode": "MQTT server"
+        }
+      },
+      "bridge": {
+        "title": "Embedded TLS bridge",
+        "description": "Requires compatible firmware and router DNAT redirecting device traffic to this Home Assistant listener. Use a different port for each device.",
+        "data": {
+          "bridge_port": "TLS listening port",
+          "bridge_cloud": "Relay to manufacturer server"
+        }
+      }
+    },
+    "error": {
+      "name_too_long": "Use a name with at most 30 characters.",
+      "name_required": "Enter a name.",
+      "host_required": "Enter the MQTT host.",
+      "invalid_device_id": "Enter a device ID without MQTT topic separators or wildcards.",
+      "invalid_mqtt_mode": "Select a valid MQTT mode.",
+      "invalid_port": "Enter a port from 1 to 65535.",
+      "already_configured": "This device ID is already configured in another entry.",
+      "bridge_port_in_use": "Another entry already uses this bridge port."
+    },
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "reconfigure_successful": "Settings saved. Reconnecting with the new configuration.",
+      "reconfigure_failed": "Could not apply the change. The previous configuration was preserved or restored. Please try again.",
+      "config_changed": "The entry was changed or removed elsewhere. Start reconfiguration again."
+    }
+  }
+}
