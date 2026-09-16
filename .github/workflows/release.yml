@@ -34,7 +34,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          version=$(jq -er '.version | select(type == "string" and length > 0)' custom_components/virtual_layer/manifest.json)
+          version=$(jq -er '.version | select(type == "string" and length > 0)' custom_components/purethink/manifest.json)
           tag="v${version}"
           git check-ref-format "refs/tags/${tag}"
           if [[ "$version" == *$'\n'* || "$version" == *$'\r'* ]]; then
@@ -61,9 +61,9 @@ jobs:
 
       - name: "ZIP the integration directory"
         if: steps.version.outputs.exists != 'true'
-        working-directory: custom_components/virtual_layer
+        working-directory: custom_components/purethink
         shell: bash
-        run: zip -r "$RUNNER_TEMP/virtual_layer.zip" . -x '*/__pycache__/*' '*.pyc'
+        run: zip -r "$RUNNER_TEMP/purethink.zip" . -x '*/__pycache__/*' '*.pyc'
 
       # GITHUB_TOKEN-created releases do not trigger the published workflow,
       # so attach the ZIP here as part of creating the release.
@@ -73,7 +73,7 @@ jobs:
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
         shell: bash
         run: |
-          gh release create "$RELEASE_TAG" "$RUNNER_TEMP/virtual_layer.zip" \
+          gh release create "$RELEASE_TAG" "$RUNNER_TEMP/purethink.zip" \
             --target "$GITHUB_SHA" \
             --title "$RELEASE_TAG" \
             --generate-notes
@@ -91,10 +91,10 @@ jobs:
       - name: "ZIP the integration directory"
         shell: "bash"
         run: |
-          cd "${{ github.workspace }}/custom_components/virtual_layer"
-          zip virtual_layer.zip -r ./
+          cd "${{ github.workspace }}/custom_components/purethink"
+          zip purethink.zip -r ./
 
       - name: "Upload the ZIP file to the release"
         uses: "softprops/action-gh-release@v2"
         with:
-          files: "${{ github.workspace }}/custom_components/virtual_layer/virtual_layer.zip"
+          files: "${{ github.workspace }}/custom_components/purethink/purethink.zip"
