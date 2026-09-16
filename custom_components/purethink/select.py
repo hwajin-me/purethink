@@ -1,11 +1,10 @@
-import asyncio
 import logging
-import time
 
 from homeassistant.components.select import SelectEntity
+from homeassistant.core import callback
+from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from . import mqtt_client
 from .const import DOMAIN, PRESSURE_MODES
 from .protocol import generate_command
 
@@ -58,6 +57,10 @@ class BaseSelect(SelectEntity):
             )
         )
 
+        if self.hass.data[DOMAIN][self._entry_id].get("state"):
+            self._handle_update()
+
+    @callback
     def _handle_update(self):
         state = self.hass.data[DOMAIN][self._entry_id]["state"]
         self._attr_current_option = self._attr_options[state.get(self._entity_type, self._default_index)]
@@ -71,7 +74,7 @@ class BaseSelect(SelectEntity):
                 self.hass,
                 **{self._entity_type: option}
             )
-            mqtt_client.publish(self._command_topic, payload, qos=1)
+            self.hass.data[DOMAIN][self._entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
             _LOGGER.debug(f"[{self.__class__.__name__}] Command sent ▶ {payload}")
         except Exception as e:
             _LOGGER.error(f"[{self.__class__.__name__}] 명령 전송 실패: {e}", exc_info=True)
@@ -96,6 +99,7 @@ class FanModeSelect(SelectEntity):
         self._attr_current_option = "Fan In-Off Fan Out-Off"
         self._attr_available = False
         self._attr_sync = True
+        self._cancel_adjustment = None
 
     @property
     def device_info(self):
@@ -111,6 +115,11 @@ class FanModeSelect(SelectEntity):
             )
         )
 
+        self.async_on_remove(self._cancel_pending_adjustment)
+        if self.hass.data[DOMAIN][self._entry.entry_id].get("state"):
+            self._handle_update()
+
+    @callback
     def _handle_update(self):
         state = self.hass.data[DOMAIN][self._entry.entry_id]["state"]
         fan_in = state.get("fan_in", 0)
@@ -125,8 +134,21 @@ class FanModeSelect(SelectEntity):
 
         # 만약에 팬 속도가 0 인데 state 결과가 환기 꺼짐이 아니라면 끔으로 변경
         # 처리 하기 전에 1초 대기
-        time.sleep(1)
-        self._adjust_fan_mode(fan_in, fan_out, state)
+        self._cancel_pending_adjustment()
+        self._cancel_adjustment = async_call_later(self.hass, 1, self._adjust_latest_state)
+
+    @callback
+    def _cancel_pending_adjustment(self):
+        if self._cancel_adjustment is not None:
+            self._cancel_adjustment()
+            self._cancel_adjustment = None
+
+    @callback
+    def _adjust_latest_state(self, _now):
+        self._cancel_adjustment = None
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._entry.entry_id)
+        if entry_data is not None and (state := entry_data.get("state")):
+            self._adjust_fan_mode(state.get("fan_in", 0), state.get("fan_out", 0), state)
 
     def _adjust_fan_mode(self, fan_in, fan_out, state):
         if (fan_in != 0 or fan_out != 0) and state.get("fan_speed", 0) == 0:
@@ -137,7 +159,7 @@ class FanModeSelect(SelectEntity):
                                        fan_out=0,
                                        fan_mode="환기 꺼짐",
                                        mode="Manual")
-            mqtt_client.publish(self._command_topic, payload, qos=1)
+            self.hass.data[DOMAIN][self._entry.entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
 
         elif state.get("fan_speed", 0) > 0 and (fan_in == 0 or fan_out == 0):
             _LOGGER.debug(f"[FanModeSelect] 팬 속도 > 0 감지, 흡/배기로 변경 {self._entry.data['device_id']}")
@@ -147,7 +169,7 @@ class FanModeSelect(SelectEntity):
                                        fan_out=1,
                                        fan_mode="흡/배기",
                                        mode="Manual")
-            mqtt_client.publish(self._command_topic, payload, qos=1)
+            self.hass.data[DOMAIN][self._entry.entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
 
     async def async_select_option(self, option: str):
         try:
@@ -156,7 +178,7 @@ class FanModeSelect(SelectEntity):
                 self.hass,
                 fan_mode=option
             )
-            mqtt_client.publish(self._command_topic, payload, qos=1)
+            self.hass.data[DOMAIN][self._entry.entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
             _LOGGER.debug(f"[FanModeSelect] Command sent ▶ {payload}")
         except Exception as e:
             _LOGGER.error(f"[FanModeSelect] 명령 전송 실패: {e}", exc_info=True)

@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Purethink Ventilation",
+        "data": {
+          "friendly_name": "이름",
+          "device_id": "제품 ID",
+          "mqtt_mode": "MQTT 서버"
+        }
+      },
+      "local_mqtt": {
+        "title": "내부망 MQTT 서버",
+        "data": {
+          "mqtt_host": "호스트",
+          "mqtt_port": "포트",
+          "mqtt_username": "사용자 이름",
+          "mqtt_password": "비밀번호"
+        }
+      },
+      "reconfigure": {
+        "title": "Purethink 설정 변경",
+        "data": {
+          "friendly_name": "이름",
+          "device_id": "제품 ID",
+          "mqtt_mode": "MQTT 서버"
+        }
+      },
+      "bridge": {
+        "title": "내장 TLS 브리지",
+        "description": "기기 트래픽을 이 Home Assistant의 수신 포트로 전달하는 라우터 DNAT 설정과 호환 펌웨어가 필요합니다. 기기별로 다른 포트를 사용하세요.",
+        "data": {
+          "bridge_port": "TLS 수신 포트",
+          "bridge_cloud": "제조사 서버에도 연결"
+        }
+      }
+    },
+    "error": {
+      "name_too_long": "이름을 30자 이내로 입력하세요.",
+      "name_required": "이름을 입력하세요.",
+      "host_required": "MQTT 호스트를 입력하세요.",
+      "invalid_device_id": "제품 ID를 입력하세요. /, +, # 문자는 사용할 수 없습니다.",
+      "invalid_mqtt_mode": "유효한 MQTT 모드를 선택하세요.",
+      "invalid_port": "1~65535 범위의 포트를 입력하세요.",
+      "already_configured": "다른 항목에 이미 등록된 제품 ID입니다.",
+      "bridge_port_in_use": "다른 기기가 사용하는 브리지 포트입니다."
+    },
+    "abort": {
+      "already_configured": "이미 등록된 기기입니다.",
+      "reconfigure_successful": "설정을 저장했습니다. 새 설정으로 다시 연결합니다.",
+      "reconfigure_failed": "설정을 변경하지 못했습니다. 기존 설정을 유지하거나 복원했습니다. 다시 시도하세요.",
+      "config_changed": "설정이 다른 곳에서 변경되었거나 삭제되었습니다. 재구성을 다시 시작하세요."
+    }
+  }
+}

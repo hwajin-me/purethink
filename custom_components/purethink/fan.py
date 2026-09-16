@@ -4,7 +4,6 @@ from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util.percentage import ordered_list_item_to_percentage, percentage_to_ordered_list_item
 
-from . import mqtt_client
 from .const import DOMAIN, FAN_SPEEDS
 from .protocol import generate_command
 
@@ -48,6 +47,9 @@ class PurethinkFan(FanEntity):
             )
         )
 
+        if self.hass.data[DOMAIN][self._config_entry.entry_id].get("state"):
+            self._handle_update()
+
     def _handle_update(self):
         state = self.hass.data[DOMAIN][self._config_entry.entry_id]["state"]
         self._attr_is_on = state.get("power", 0) == 1 and (
@@ -72,13 +74,13 @@ class PurethinkFan(FanEntity):
 
     async def async_toggle(self, **kwargs) -> None:
         if self._attr_is_on is True:
-            await self.async_turn_off(kwargs)
+            await self.async_turn_off(**kwargs)
         else:
-            await self.async_turn_on(kwargs)
+            await self.async_turn_on(**kwargs)
 
     async def async_turn_on(self, percentage: int | None = None, preset_mode: str | None = None, **kwargs):
         payload = generate_command(self._config['device_id'], self.hass, power=1, fan_mode="흡/배기")
-        mqtt_client.publish(self._command_topic, payload, qos=1)
+        self.hass.data[DOMAIN][self._config_entry.entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
 
         if percentage is not None:
             await self.async_set_percentage(percentage)
@@ -87,7 +89,7 @@ class PurethinkFan(FanEntity):
 
     async def async_turn_off(self, **kwargs):
         payload = generate_command(self._config['device_id'], self.hass, fan_mode="환기 꺼짐", fan_speed=0, mode="Manual")
-        mqtt_client.publish(self._command_topic, payload, qos=1)
+        self.hass.data[DOMAIN][self._config_entry.entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
 
     async def async_set_percentage(self, percentage: int):
         if percentage == 0:
@@ -111,11 +113,11 @@ class PurethinkFan(FanEntity):
             fan_speed=0,
             fan_mode="환기 꺼짐",
             mode="Manual")
-        mqtt_client.publish(self._command_topic, payload, qos=1)
+        self.hass.data[DOMAIN][self._config_entry.entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
 
     async def async_set_preset_mode(self, preset_mode: str):
         payload = generate_command(self._config['device_id'], self.hass, mode=preset_mode)
-        mqtt_client.publish(self._command_topic, payload, qos=1)
+        self.hass.data[DOMAIN][self._config_entry.entry_id]["mqtt"].publish(self._command_topic, payload, qos=1)
 
     @property
     def device_info(self):

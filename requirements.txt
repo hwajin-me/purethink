@@ -1,3 +1,7 @@
 homeassistant>=2025.4.4
 pytest~=8.3.3
 paho-mqtt
+pytest-asyncio>=0.26,<2
+pytest-cov>=6,<8
+
+amqtt==0.11.3

@@ -71,12 +71,9 @@ def _parse_filter(hex_str: str, start_bit: int, length: int) -> dict:
 
 def generate_command(device_id: str, hass, **kwargs) -> str:
     try:
-        state = {}
-        for entry_id, data in hass.data.get(DOMAIN, {}).items():
-            if data.get("state") and data.get("command_topic"):
-                if device_id in entry_id or device_id in data.get("command_topic", ""):
-                    state = data.get("state", {})
-                    break
+        domain_data = hass.data.get(DOMAIN, {})
+        entry_id = domain_data.get("_devices", {}).get(device_id)
+        state = domain_data.get(entry_id, {}).get("state", {})
 
         # "mode" 파라미터가 전원 제어("on", "off")인지 기기 모드 변경인지 구분
         if "mode" in kwargs:

@@ -1,6 +1,7 @@
 import logging
 
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.const import EntityCategory
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
 from .const import DOMAIN
@@ -12,6 +13,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     entry_data = hass.data[DOMAIN][config_entry.entry_id]
     device_info = entry_data["device"]
     sensors = [
+        DeviceIdSensor(config_entry, device_info),
         AirQualitySensor(config_entry, device_info, "co2", "CO₂", "ppm", "mdi:molecule-co2"),
         AirQualitySensor(config_entry, device_info, "pm1", "PM 1.0", "µg/m³", "mdi:weather-dust"),
         AirQualitySensor(config_entry, device_info, "pm25", "PM 2.5", "µg/m³", "mdi:weather-dust"),
@@ -52,6 +54,9 @@ class BaseSensor(SensorEntity):
                 self._update_state
             )
         )
+
+        if self.hass.data[DOMAIN][self._entry.entry_id].get("state"):
+            self._update_state()
 
     def _update_state(self):
         state = self.hass.data[DOMAIN][self._entry.entry_id].get("state", {})
@@ -117,3 +122,17 @@ class AlarmSensor(BaseSensor):
         _LOGGER.debug(
             f"[{self.name}] State updated for AlarmSensor: native_value={self._attr_native_value}, available={self._attr_available}")
         self.schedule_update_ha_state()
+
+
+class DeviceIdSensor(SensorEntity):
+    """Configured identifier, available even before the first telemetry packet."""
+
+    _attr_should_poll = False
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:identifier"
+
+    def __init__(self, entry, device_info):
+        self._attr_unique_id = f"{entry.data['device_id']}_device_id"
+        self._attr_name = f"{entry.data['friendly_name']} Device ID"
+        self._attr_native_value = entry.data['device_id']
+        self._attr_device_info = device_info
